@@ -89,7 +89,7 @@ const GlobalChatbot = () => {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 right-6 z-50 h-14 w-14 rounded-full bg-accent text-accent-foreground shadow-lg hover:bg-accent/90 hover:scale-110 transition-all duration-300"
+        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-accent text-accent-foreground shadow-lg hover:bg-accent/90 hover:scale-110 transition-all duration-300"
         size="icon"
       >
         <MessageCircle className="h-6 w-6" />
@@ -99,7 +99,7 @@ const GlobalChatbot = () => {
 
   return (
     <div 
-      className={`fixed bottom-24 right-6 z-50 bg-card border border-border rounded-xl shadow-2xl transition-all duration-300 ${
+      className={`fixed bottom-6 right-6 z-50 bg-card border border-border rounded-xl shadow-2xl transition-all duration-300 ${
         isMinimized ? "w-72 h-14" : "w-80 sm:w-96 h-[500px]"
       }`}
     >

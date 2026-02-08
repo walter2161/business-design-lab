@@ -2,10 +2,11 @@ import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Header from "@/components/Header";
-import HeroSection from "@/components/HeroSection";
+import HeroCarousel from "@/components/HeroCarousel";
 import CategoryFilter from "@/components/CategoryFilter";
 import ModelCard from "@/components/ModelCard";
 import Footer from "@/components/Footer";
+import SuperPromotionBanner from "@/components/SuperPromotionBanner";
 import { PromotionBanner, ActiveCoupons } from "@/components/PromotionComponents";
 import { BlogSection } from "@/components/BlogComponents";
 import { models, type Category } from "@/data/models";
@@ -31,7 +32,7 @@ const Index = () => {
       <PromotionBanner />
       
       <Header />
-      <HeroSection />
+      <HeroCarousel />
 
       <main id="catalogo" className="flex-1 container mx-auto px-4 py-12">
         {/* Active Coupons Section */}
@@ -53,12 +54,24 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Grid */}
+        {/* Grid - first 3 */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((model) => (
+          {filtered.slice(0, 3).map((model) => (
             <ModelCard key={model.id} model={model} />
           ))}
         </div>
+
+        {/* Super Promotion */}
+        {filtered.length > 0 && <SuperPromotionBanner />}
+
+        {/* Grid - rest */}
+        {filtered.length > 3 && (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.slice(3).map((model) => (
+              <ModelCard key={model.id} model={model} />
+            ))}
+          </div>
+        )}
 
         {filtered.length === 0 && (
           <div className="py-20 text-center">
