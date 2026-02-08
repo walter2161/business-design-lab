@@ -27,6 +27,8 @@ import { toast } from "sonner";
 import { CouponCard, CouponTimer } from "@/components/PromotionComponents";
 import { RelatedArticles } from "@/components/BlogComponents";
 import { coupons, applyCoupon, isPromotionActive, getApplicableCoupons } from "@/data/promotions";
+import { PackPreview } from "@/components/PackPreview";
+import { standardPackItems } from "@/data/packContents";
 
 const ModelDetail = () => {
   const { id } = useParams();
@@ -325,14 +327,7 @@ const ModelDetail = () => {
 
             {/* Pack */}
             <Section icon={<Package className="h-5 w-5" />} title="O que vem no Pack">
-              <div className="grid gap-2 sm:grid-cols-2">
-                {model.packContents.map((item) => (
-                  <div key={item} className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3">
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-accent" />
-                    <span className="text-sm text-foreground">{item}</span>
-                  </div>
-                ))}
-              </div>
+              <PackPreview maxItems={10} />
             </Section>
 
             {/* AI Agent */}
@@ -418,7 +413,7 @@ const ModelDetail = () => {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <CheckCircle2 className="h-4 w-4 text-accent" />
-                    {model.packContents.length} arquivos inclusos
+                    {standardPackItems.length} arquivos inclusos
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <CheckCircle2 className="h-4 w-4 text-accent" />

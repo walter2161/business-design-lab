@@ -14,10 +14,6 @@ import {
   CheckCircle2,
   Send,
   Loader2,
-  Download,
-  FileText,
-  Table,
-  Presentation,
   BookOpen,
   Lightbulb,
   Rocket,
@@ -33,6 +29,7 @@ import { models, categoryIcons } from "@/data/models";
 import { useAuth } from "@/contexts/AuthContext";
 import { RelatedArticles, BlogSection } from "@/components/BlogComponents";
 import { getRelatedPosts, getPostsByCategory } from "@/data/blog";
+import { PackContentsDisplay } from "@/components/PackContentsDisplay";
 
 const MyModel = () => {
   const { id } = useParams();
@@ -149,7 +146,7 @@ const MyModel = () => {
               <span className="hidden sm:inline">Dados</span>
             </TabsTrigger>
             <TabsTrigger value="downloads" className="gap-2">
-              <Download className="h-4 w-4" />
+              <Package className="h-4 w-4" />
               <span className="hidden sm:inline">Downloads</span>
             </TabsTrigger>
             <TabsTrigger value="ia" className="gap-2">
@@ -256,27 +253,7 @@ const MyModel = () => {
 
           {/* Tab Downloads */}
           <TabsContent value="downloads" className="space-y-8">
-            <Section icon={<Package className="h-5 w-5" />} title="Arquivos do Pack">
-              <div className="grid gap-3 sm:grid-cols-2">
-                {model.packContents.map((item, i) => (
-                  <div key={item} className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      {item.includes("Planilha") ? (
-                        <Table className="h-5 w-5 text-accent" />
-                      ) : item.includes("Template") || item.includes("Modelo") ? (
-                        <Presentation className="h-5 w-5 text-accent" />
-                      ) : (
-                        <FileText className="h-5 w-5 text-accent" />
-                      )}
-                      <span className="text-sm text-foreground">{item}</span>
-                    </div>
-                    <Button variant="ghost" size="sm" className="gap-2">
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </Section>
+            <PackContentsDisplay modelName={model.name} />
           </TabsContent>
 
           {/* Tab Consultor IA */}
