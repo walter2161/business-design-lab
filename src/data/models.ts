@@ -12,6 +12,7 @@ export interface BusinessModel {
   shortDescription: string;
   price: number;
   category: Category;
+  image: string;
   targetAudience: string;
   notFor: string;
   objective: string;
@@ -62,6 +63,7 @@ export const models: BusinessModel[] = [
     shortDescription: "Modelo validado para receita previsível com contratos mensais de marketing digital.",
     price: 197,
     category: "Serviços",
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop",
     targetAudience: "Profissionais de marketing, freelancers que querem escalar, donos de agências pequenas.",
     notFor: "Quem busca renda passiva sem trabalho operacional.",
     objective: "Montar uma agência com receita recorrente previsível a partir de contratos mensais.",
@@ -97,6 +99,7 @@ export const models: BusinessModel[] = [
     shortDescription: "Crie um software focado em um nicho específico com receita recorrente mensal.",
     price: 297,
     category: "SaaS",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop",
     targetAudience: "Desenvolvedores, empreendedores tech, CTOs de startups early-stage.",
     notFor: "Quem não tem capacidade técnica ou orçamento para desenvolvimento.",
     objective: "Lançar um SaaS lucrativo focando em um micro-nicho mal atendido.",
@@ -132,6 +135,7 @@ export const models: BusinessModel[] = [
     shortDescription: "Monte uma operação de dropshipping com fornecedores nacionais e margem real.",
     price: 147,
     category: "E-commerce",
+    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop",
     targetAudience: "Empreendedores iniciantes, quem quer operar sem estoque.",
     notFor: "Quem espera resultados sem investimento em tráfego pago.",
     objective: "Criar uma operação de e-commerce sem estoque próprio, com fornecedores brasileiros.",
@@ -167,6 +171,7 @@ export const models: BusinessModel[] = [
     shortDescription: "Conecte prestadores de serviço a clientes na sua região com comissão por transação.",
     price: 347,
     category: "Marketplace",
+    image: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=400&h=300&fit=crop",
     targetAudience: "Empreendedores com visão de plataforma, conhecimento em produto digital.",
     notFor: "Quem quer resultado rápido sem construir comunidade.",
     objective: "Criar um marketplace local que conecta prestadores de serviço a clientes.",
@@ -202,6 +207,7 @@ export const models: BusinessModel[] = [
     shortDescription: "Crie e venda um programa premium de alto valor com mentoria e resultados garantidos.",
     price: 247,
     category: "Infoprodutos",
+    image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=300&fit=crop",
     targetAudience: "Especialistas, consultores, profissionais com conhecimento profundo em uma área.",
     notFor: "Quem não tem expertise comprovada ou cases de sucesso.",
     objective: "Criar um programa de mentoria/curso high ticket (R$ 2.000–R$ 10.000).",
@@ -237,6 +243,7 @@ export const models: BusinessModel[] = [
     shortDescription: "Transforme qualquer negócio local em uma máquina de receita recorrente previsível.",
     price: 167,
     category: "Negócios Locais",
+    image: "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?w=400&h=300&fit=crop",
     targetAudience: "Donos de negócios locais, empreendedores de bairro, franqueados.",
     notFor: "Quem não tem presença física ou atendimento local.",
     objective: "Implementar modelo de recorrência (assinatura/plano) em negócio local existente.",

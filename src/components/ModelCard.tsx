@@ -14,15 +14,17 @@ const ModelCard = ({ model }: ModelCardProps) => {
     <Link to={`/modelo/${model.id}`} className="group block">
       <div className="card-hover overflow-hidden rounded-xl border border-border bg-card">
         {/* Preview visual */}
-        <div className="relative h-40 bg-navy-gradient p-6">
-          <div className="absolute inset-0 bg-hero-overlay" />
-          <div className="relative z-10 flex h-full flex-col justify-between">
-            <Badge className="w-fit border-0 bg-accent/20 text-amber font-medium text-xs">
+        <div className="relative h-40 overflow-hidden">
+          <img 
+            src={model.image} 
+            alt={model.name}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+          <div className="absolute inset-0 p-4 flex flex-col justify-between">
+            <Badge className="w-fit border-0 bg-accent/90 text-accent-foreground font-medium text-xs">
               {categoryIcons[model.category]} {model.category}
             </Badge>
-            <div className="text-3xl font-bold text-amber/30 font-display">
-              {categoryIcons[model.category]}
-            </div>
           </div>
         </div>
 
