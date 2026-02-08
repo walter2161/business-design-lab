@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Loader2, Bot, Minimize2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -19,12 +20,15 @@ const GlobalChatbot = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Contexto dos produtos para o prompt
+  // URL base para os links
+  const baseUrl = window.location.origin;
+
+  // Contexto dos produtos para o prompt (com IDs para links)
   const productsContext = models.map(m => 
-    `- ${m.name} (${m.category}): ${m.shortDescription} - R$${m.price}`
+    `- ${m.name} (ID: ${m.id}) - ${m.category}: ${m.shortDescription} - R$${m.price}`
   ).join("\n");
 
-  const systemPrompt = getStoreChatbotPrompt(productsContext);
+  const systemPrompt = getStoreChatbotPrompt(productsContext, baseUrl);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -154,7 +158,27 @@ const GlobalChatbot = () => {
                       : "bg-muted text-foreground"
                   }`}
                 >
-                  {msg.content}
+                  {msg.role === "assistant" ? (
+                    <div className="prose prose-sm dark:prose-invert max-w-none [&_a]:text-accent [&_a]:underline [&_a]:font-medium [&_p]:my-1 [&_ul]:my-1 [&_li]:my-0.5 [&_strong]:text-foreground">
+                      <ReactMarkdown
+                        components={{
+                          a: ({ href, children }) => (
+                            <a 
+                              href={href} 
+                              target="_self" 
+                              className="text-accent hover:text-accent/80 underline font-medium"
+                            >
+                              {children}
+                            </a>
+                          ),
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    msg.content
+                  )}
                 </div>
               </div>
             ))}
