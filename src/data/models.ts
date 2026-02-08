@@ -1,3 +1,5 @@
+import { getPackContentsAsStrings } from "./packContents";
+
 export type Category = 
   | "Serviços Pessoais" 
   | "Saúde e Bem-Estar" 
@@ -39,6 +41,9 @@ export interface BusinessModel {
   packContents: string[];
   aiAgentDescription: string;
 }
+
+// Pack padrão de 30 itens para todos os modelos
+export const standardPackContents = getPackContentsAsStrings();
 
 export const categories: Category[] = [
   "Serviços Pessoais",
@@ -1879,3 +1884,8 @@ export const models: BusinessModel[] = [
     aiAgentDescription: "IA especialista em segurança. Auxilia com operação, contratos, equipamentos e crescimento.",
   },
 ];
+
+// Aplica o pack padrão de 30 itens a todos os modelos
+models.forEach(model => {
+  model.packContents = standardPackContents;
+});
