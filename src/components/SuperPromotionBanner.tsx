@@ -52,64 +52,55 @@ const SuperPromotionBanner = () => {
         ))}
       </div>
 
-      <div className="relative z-10 container mx-auto px-6 py-12 md:py-16">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+      <div className="relative z-10 container mx-auto px-4 py-8 md:py-10">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Left content */}
-          <div className="text-center lg:text-left">
-            <div className="flex items-center justify-center lg:justify-start gap-2 mb-4">
-              <Sparkles className="h-5 w-5 text-white animate-pulse" />
-              <Badge className="bg-white/20 text-white border-0 text-sm font-semibold">
+          <div className="text-center md:text-left">
+            <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
+              <Sparkles className="h-4 w-4 text-white animate-pulse" />
+              <Badge className="bg-white/20 text-white border-0 text-xs font-semibold">
                 OFERTA ESPECIAL
               </Badge>
-              <Zap className="h-5 w-5 text-white animate-pulse" />
+              <Zap className="h-4 w-4 text-white animate-pulse" />
             </div>
             
-            <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-              Super Promoção <br />
-              <span className="text-navy-dark">Primeiro Negócio</span>
+            <h2 className="font-display text-xl md:text-2xl lg:text-3xl font-bold text-white mb-2">
+              Super Promoção <span className="text-navy-dark">Primeiro Negócio</span>
             </h2>
             
-            <p className="text-white/90 text-lg max-w-md mb-6">
-              Compre seu primeiro modelo com <strong className="text-white">30% de desconto</strong> e ganhe 
-              acesso vitalício ao onHub Premium!
+            <p className="text-white/90 text-sm md:text-base max-w-md mb-4">
+              Compre seu primeiro modelo com <strong className="text-white">10% de desconto</strong> e comece sua jornada empreendedora!
             </p>
 
-            <div className="flex items-center justify-center lg:justify-start gap-3 mb-6">
-              <Gift className="h-6 w-6 text-white" />
-              <span className="text-white font-medium">
-                + Bônus: Consultoria 1h com especialista
-              </span>
-            </div>
-
             <Button 
-              size="lg"
-              className="bg-navy text-white hover:bg-navy-light gap-2 text-lg px-8 py-6 shadow-xl hover:shadow-2xl transition-all"
+              size="sm"
+              className="bg-navy text-white hover:bg-navy-light gap-2 text-sm px-6 py-2 shadow-lg hover:shadow-xl transition-all"
             >
               Aproveitar agora
-              <ArrowRight className="h-5 w-5" />
+              <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
 
           {/* Right content - Timer */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/20">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Timer className="h-5 w-5 text-white" />
-              <span className="text-white font-semibold uppercase tracking-wider text-sm">
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 md:p-5 border border-white/20">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <Timer className="h-4 w-4 text-white" />
+              <span className="text-white font-semibold uppercase tracking-wider text-xs">
                 Termina em
               </span>
             </div>
             
-            <div className="flex items-center gap-3 md:gap-4">
+            <div className="flex items-center gap-2 md:gap-3">
               <TimeBlock value={formatTime(timeLeft.hours)} label="Horas" />
-              <span className="text-white text-3xl font-bold">:</span>
+              <span className="text-white text-2xl font-bold">:</span>
               <TimeBlock value={formatTime(timeLeft.minutes)} label="Min" />
-              <span className="text-white text-3xl font-bold">:</span>
+              <span className="text-white text-2xl font-bold">:</span>
               <TimeBlock value={formatTime(timeLeft.seconds)} label="Seg" />
             </div>
 
-            <div className="mt-6 text-center">
-              <p className="text-white/80 text-sm">
-                Use o cupom: <code className="bg-white/20 px-3 py-1 rounded-lg font-bold text-white">PRIMEIRO30</code>
+            <div className="mt-4 text-center">
+              <p className="text-white/80 text-xs">
+                Use o cupom: <code className="bg-white/20 px-2 py-0.5 rounded-md font-bold text-white">PRIMEIRO10</code>
               </p>
             </div>
           </div>
@@ -121,12 +112,12 @@ const SuperPromotionBanner = () => {
 
 const TimeBlock = ({ value, label }: { value: string; label: string }) => (
   <div className="text-center">
-    <div className="bg-white rounded-xl px-4 py-3 md:px-6 md:py-4 shadow-lg">
-      <span className="font-display text-3xl md:text-4xl font-bold text-navy">
+    <div className="bg-white rounded-lg px-3 py-2 md:px-4 md:py-3 shadow-md">
+      <span className="font-display text-xl md:text-2xl font-bold text-navy">
         {value}
       </span>
     </div>
-    <span className="text-white/70 text-xs mt-2 block uppercase tracking-wider">
+    <span className="text-white/70 text-[10px] mt-1 block uppercase tracking-wider">
       {label}
     </span>
   </div>
