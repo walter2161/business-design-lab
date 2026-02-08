@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ScrollToTop from "@/components/ScrollToTop";
 import CookieBanner from "@/components/CookieBanner";
+import GlobalChatbot from "@/components/GlobalChatbot";
 import Index from "./pages/Index";
 import ModelDetail from "./pages/ModelDetail";
 import Dashboard from "./pages/Dashboard";
@@ -66,6 +67,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           <CookieBanner />
+          <GlobalChatbot />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

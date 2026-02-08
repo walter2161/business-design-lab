@@ -1,5 +1,5 @@
 import { useParams, Link, Navigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   ArrowLeft,
   Target,
@@ -31,16 +31,22 @@ import { useAuth } from "@/contexts/AuthContext";
 import { RelatedArticles, BlogSection } from "@/components/BlogComponents";
 import { getRelatedPosts, getPostsByCategory } from "@/data/blog";
 import { PackContentsDisplay } from "@/components/PackContentsDisplay";
+import { sendMistralMessage, getProductAgentPrompt, ChatMessage } from "@/lib/mistralAI";
 
 const MyModel = () => {
   const { id } = useParams();
   const { user, isAuthenticated } = useAuth();
   const [aiQuestion, setAiQuestion] = useState("");
-  const [aiResponse, setAiResponse] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [chatHistory, setChatHistory] = useState<{ role: "user" | "ai"; content: string }[]>([]);
+  const [chatHistory, setChatHistory] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const model = models.find((m) => m.id === id);
+
+  // Scroll to bottom of chat
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatHistory]);
 
   // Redireciona se não estiver autenticado
   if (!isAuthenticated) {
@@ -78,26 +84,68 @@ const MyModel = () => {
     );
   }
 
+  // Prepara contexto detalhado do produto para o agente
+  const productDetails = `
+Nome: ${model.name}
+Categoria: ${model.category}
+Descrição: ${model.shortDescription}
+Objetivo: ${model.objective}
+Público-alvo: ${model.targetAudience}
+Não é para: ${model.notFor}
+Modelo de receita: ${model.revenueModel}
+Método de entrega: ${model.deliveryMethod}
+Estratégia de expansão: ${model.expansionStrategy}
+
+FONTES DE AQUISIÇÃO:
+${model.acquisitionSources.map(s => `- ${s}`).join("\n")}
+
+ESTRUTURA DE CUSTOS:
+${model.costStructure.map(c => `- ${c}`).join("\n")}
+
+BLOCOS DE DADOS:
+${model.dataBlocks.map(d => `- ${d}`).join("\n")}
+
+BENCHMARKS (valores de referência):
+${model.benchmarks.map(b => `- ${b.metric}: ${b.value}`).join("\n")}
+
+TAXAS DE CONVERSÃO:
+${model.conversionRates.map(c => `- ${c.stage}: ${c.rate}`).join("\n")}
+
+CRONOGRAMA (Delta T):
+${model.timeline.map(t => `- ${t.phase}: ${t.duration}`).join("\n")}
+
+CONTEÚDO DO PACK:
+${model.packContents.join(", ")}
+`;
+
+  const systemPrompt = getProductAgentPrompt(model.name, productDetails);
+
   const handleAiSubmit = async () => {
-    if (!aiQuestion.trim()) return;
-    
+    if (!aiQuestion.trim() || isAiLoading) return;
+
+    const userMessage = aiQuestion.trim();
+    setAiQuestion("");
+    setChatHistory(prev => [...prev, { role: "user", content: userMessage }]);
     setIsAiLoading(true);
-    setChatHistory(prev => [...prev, { role: "user", content: aiQuestion }]);
-    
-    // Simula resposta da IA (em produção, conectaria com Lovable AI)
-    setTimeout(() => {
-      const responses = [
-        `Para o modelo ${model.name}, recomendo começar focando nas métricas de ${model.benchmarks[0]?.metric}. Baseado nos benchmarks, você pode esperar ${model.benchmarks[0]?.value} inicialmente.`,
-        `A arquitetura de receita do ${model.name} funciona através de ${model.revenueModel}. As principais fontes de aquisição são: ${model.acquisitionSources.slice(0, 2).join(", ")}.`,
-        `Para maximizar a conversão no ${model.name}, foque na etapa "${model.conversionRates[0]?.stage}" que tem taxa média de ${model.conversionRates[0]?.rate}. Melhore isso primeiro antes de escalar.`,
-        `O Delta T para o ${model.name} é dividido em fases: ${model.timeline.map(t => `${t.phase} (${t.duration})`).join(", ")}. Siga essa ordem para melhores resultados.`,
-      ];
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-      setChatHistory(prev => [...prev, { role: "ai", content: randomResponse }]);
-      setAiResponse(randomResponse);
-      setIsAiLoading(false);
-      setAiQuestion("");
-    }, 1500);
+
+    // Prepara histórico para API
+    const apiHistory: ChatMessage[] = [
+      ...chatHistory.map(m => ({ role: m.role, content: m.content })),
+      { role: "user" as const, content: userMessage }
+    ];
+
+    const response = await sendMistralMessage(apiHistory, systemPrompt);
+
+    if (response.success) {
+      setChatHistory(prev => [...prev, { role: "assistant", content: response.content }]);
+    } else {
+      setChatHistory(prev => [...prev, { 
+        role: "assistant", 
+        content: "Desculpe, ocorreu um erro na comunicação. Tente novamente em alguns segundos." 
+      }]);
+    }
+
+    setIsAiLoading(false);
   };
 
   return (
@@ -272,22 +320,33 @@ const MyModel = () => {
                 </p>
                 
                 {/* Chat history */}
-                {chatHistory.length > 0 && (
-                  <div className="mb-4 max-h-64 overflow-y-auto space-y-3 border-t border-border pt-4">
-                    {chatHistory.map((msg, i) => (
-                      <div
-                        key={i}
-                        className={`p-3 rounded-lg text-sm ${
-                          msg.role === "user"
-                            ? "bg-primary text-primary-foreground ml-8"
-                            : "bg-muted text-foreground mr-8"
-                        }`}
-                      >
-                        {msg.content}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="mb-4 max-h-80 overflow-y-auto space-y-3 border-t border-border pt-4">
+                  {chatHistory.length === 0 && (
+                    <div className="text-center py-4 text-muted-foreground text-sm">
+                      <Bot className="h-8 w-8 mx-auto mb-2 text-accent/50" />
+                      Faça uma pergunta para começar a conversa com seu consultor especializado.
+                    </div>
+                  )}
+                  {chatHistory.map((msg, i) => (
+                    <div
+                      key={i}
+                      className={`p-3 rounded-lg text-sm ${
+                        msg.role === "user"
+                          ? "bg-primary text-primary-foreground ml-8"
+                          : "bg-muted text-foreground mr-8"
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
+                  ))}
+                  {isAiLoading && (
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-muted text-foreground mr-8 text-sm">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Consultando base de conhecimento...
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
 
                 {/* Input */}
                 <div className="space-y-3">
