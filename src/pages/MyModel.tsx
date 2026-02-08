@@ -22,6 +22,7 @@ import {
   FileText,
   HelpCircle,
   HardDrive,
+  GraduationCap,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,12 +34,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { RelatedArticles } from "@/components/BlogComponents";
 import ChatGPTStyleChat from "@/components/ChatGPTStyleChat";
 import ProductDrive from "@/components/ProductDrive";
+import CourseSystem from "@/components/CourseModule";
 import { sendMistralMessage, getProductAgentPrompt, ChatMessage } from "@/lib/mistralAI";
 import { cn } from "@/lib/utils";
 
 const MAX_CHAT_MESSAGES = 20;
 
-type TabType = "overview" | "files" | "consultant" | "metrics" | "content" | "settings";
+type TabType = "overview" | "files" | "course" | "consultant" | "metrics" | "content" | "settings";
 
 const MyModel = () => {
   const { id } = useParams();
@@ -162,6 +164,7 @@ ${model.packContents.join(", ")}
   const sidebarItems = [
     { id: "overview" as TabType, label: "Visão Geral", icon: Home },
     { id: "files" as TabType, label: "Arquivos", icon: Package },
+    { id: "course" as TabType, label: "Curso", icon: GraduationCap },
     { id: "consultant" as TabType, label: "Consultor IA", icon: Bot },
     { id: "metrics" as TabType, label: "Métricas", icon: BarChart3 },
     { id: "content" as TabType, label: "Conteúdo", icon: BookOpen },
@@ -426,6 +429,24 @@ ${model.packContents.join(", ")}
                 </div>
 
                 <ProductDrive modelName={model.name} />
+              </div>
+            )}
+
+            {/* Course Tab */}
+            {activeTab === "course" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="font-display text-2xl font-bold text-foreground">
+                      Curso de Implementação
+                    </h1>
+                    <p className="text-muted-foreground">
+                      Jornada completa do estudo à execução do seu negócio
+                    </p>
+                  </div>
+                </div>
+
+                <CourseSystem modelName={model.name} />
               </div>
             )}
 
