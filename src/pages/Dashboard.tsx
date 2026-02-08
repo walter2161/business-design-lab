@@ -12,10 +12,12 @@ import {
   Settings,
   Eye,
   Coins,
+  Shield,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { models, categoryIcons } from "@/data/models";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -38,10 +40,10 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      <main className="container mx-auto px-4 py-10">
+      <main className="flex-1 container mx-auto px-4 py-10">
         {/* Welcome */}
         <div className="mb-10 flex items-start justify-between">
           <div>
@@ -54,11 +56,21 @@ const Dashboard = () => {
                 : "Gerencie seus modelos de negócio adquiridos."}
             </p>
           </div>
-          <div className="flex items-center gap-2 rounded-lg bg-accent/10 px-4 py-2">
-            <Coins className="h-5 w-5 text-accent" />
-            <span className="font-display text-lg font-bold text-foreground">
-              {user.credits} créditos
-            </span>
+          <div className="flex items-center gap-4">
+            {user.role === "admin" && (
+              <Button asChild variant="outline" className="gap-2">
+                <Link to="/admin">
+                  <Shield className="h-4 w-4" />
+                  Painel Admin
+                </Link>
+              </Button>
+            )}
+            <div className="flex items-center gap-2 rounded-lg bg-accent/10 px-4 py-2">
+              <Coins className="h-5 w-5 text-accent" />
+              <span className="font-display text-lg font-bold text-foreground">
+                {user.credits} créditos
+              </span>
+            </div>
           </div>
         </div>
 
@@ -274,13 +286,15 @@ const Dashboard = () => {
             asChild
             className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90 font-display font-semibold"
           >
-            <Link to="/">
-              {user.role === "admin" ? "Ver catálogo" : "Ver catálogo"}
+            <Link to={user.role === "admin" ? "/admin" : "/"}>
+              {user.role === "admin" ? "Painel Admin" : "Ver catálogo"}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };

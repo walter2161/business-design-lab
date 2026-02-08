@@ -4,6 +4,7 @@ import { Search, BookOpen, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { BlogCard } from "@/components/BlogComponents";
 import { blogPosts } from "@/data/blog";
 import { categories, categoryIcons } from "@/data/models";
@@ -26,7 +27,7 @@ const Blog = () => {
   const allTags = [...new Set(blogPosts.flatMap(p => p.tags))];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
       {/* Hero */}
@@ -45,7 +46,7 @@ const Blog = () => {
         </div>
       </section>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-8">
         {/* Filters */}
         <div className="mb-8 space-y-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -129,11 +130,7 @@ const Blog = () => {
         )}
       </main>
 
-      <footer className="border-t border-border bg-card py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026 Loja de Negócio. Todos os direitos reservados.
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

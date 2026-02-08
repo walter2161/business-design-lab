@@ -22,7 +22,7 @@ const Header = () => {
             <Store className="h-5 w-5 text-primary-foreground" />
           </div>
           <span className="font-display text-lg font-bold text-foreground">
-            Loja de Negócio
+            Loja de Negócios
           </span>
         </Link>
 
