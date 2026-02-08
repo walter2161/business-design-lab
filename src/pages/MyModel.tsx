@@ -18,6 +18,10 @@ import {
   FileText,
   Table,
   Presentation,
+  BookOpen,
+  Lightbulb,
+  Rocket,
+  MessageSquare,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,6 +31,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import { models, categoryIcons } from "@/data/models";
 import { useAuth } from "@/contexts/AuthContext";
+import { RelatedArticles, BlogSection } from "@/components/BlogComponents";
+import { getRelatedPosts, getPostsByCategory } from "@/data/blog";
 
 const MyModel = () => {
   const { id } = useParams();
@@ -133,7 +139,7 @@ const MyModel = () => {
       {/* Tabs de conteúdo */}
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="arquitetura" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-2 h-auto p-1">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-2 h-auto p-1">
             <TabsTrigger value="arquitetura" className="gap-2">
               <Target className="h-4 w-4" />
               <span className="hidden sm:inline">Arquitetura</span>
@@ -153,6 +159,10 @@ const MyModel = () => {
             <TabsTrigger value="metricas" className="gap-2">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Métricas</span>
+            </TabsTrigger>
+            <TabsTrigger value="conteudo" className="gap-2">
+              <BookOpen className="h-4 w-4" />
+              <span className="hidden sm:inline">Conteúdo</span>
             </TabsTrigger>
           </TabsList>
 
@@ -397,6 +407,90 @@ const MyModel = () => {
               <p className="mt-4 text-xs text-muted-foreground italic">
                 * Valores de referência baseados em benchmarks do mercado. Não são promessas de resultado.
               </p>
+            </Section>
+          </TabsContent>
+
+          {/* Tab Conteúdo Educativo */}
+          <TabsContent value="conteudo" className="space-y-8">
+            <Section icon={<BookOpen className="h-5 w-5" />} title="Artigos e Guias">
+              <p className="text-sm text-muted-foreground mb-6">
+                Conteúdo educativo selecionado para ajudar você a implementar e escalar seu negócio de {model.name}.
+              </p>
+              
+              {/* Quick Tips */}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+                <div className="rounded-lg border border-accent/30 bg-accent/5 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Lightbulb className="h-4 w-4 text-accent" />
+                    <span className="text-sm font-semibold text-foreground">Dica Rápida #1</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Comece com um MVP simples. Não tente implementar tudo de uma vez - valide antes de escalar.
+                  </p>
+                </div>
+                <div className="rounded-lg border border-accent/30 bg-accent/5 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Rocket className="h-4 w-4 text-accent" />
+                    <span className="text-sm font-semibold text-foreground">Dica Rápida #2</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Foque nos primeiros 10 clientes. Entenda profundamente suas necessidades antes de crescer.
+                  </p>
+                </div>
+                <div className="rounded-lg border border-accent/30 bg-accent/5 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <MessageSquare className="h-4 w-4 text-accent" />
+                    <span className="text-sm font-semibold text-foreground">Dica Rápida #3</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Colete feedback constantemente. Cada interação é uma oportunidade de melhorar.
+                  </p>
+                </div>
+              </div>
+
+              {/* Related Articles */}
+              <RelatedArticles modelId={model.id} category={model.category} />
+            </Section>
+
+            <Section icon={<Rocket className="h-5 w-5" />} title="Próximos Passos">
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 rounded-lg border border-border bg-card p-4">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent font-display">
+                    1
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">Baixe todos os templates</p>
+                    <p className="text-sm text-muted-foreground">Acesse a aba Downloads e baixe todas as planilhas e documentos.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 rounded-lg border border-border bg-card p-4">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent font-display">
+                    2
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">Personalize para seu contexto</p>
+                    <p className="text-sm text-muted-foreground">Adapte os templates com seus dados, preços e informações locais.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 rounded-lg border border-border bg-card p-4">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent font-display">
+                    3
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">Use o Consultor IA</p>
+                    <p className="text-sm text-muted-foreground">Tire dúvidas específicas sobre implementação com a IA especializada.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 rounded-lg border border-border bg-card p-4">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent font-display">
+                    4
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">Siga o Delta T</p>
+                    <p className="text-sm text-muted-foreground">Respeite o cronograma sugerido nas métricas para implementação gradual.</p>
+                  </div>
+                </div>
+              </div>
             </Section>
           </TabsContent>
         </Tabs>

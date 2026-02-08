@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Store, User, LayoutDashboard, LogOut, Coins, Shield } from "lucide-react";
+import { Store, User, LayoutDashboard, LogOut, Coins, Shield, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -34,7 +34,18 @@ const Header = () => {
           >
             <Link to="/" className="gap-2">
               <Store className="h-4 w-4" />
-              Catálogo
+              <span className="hidden sm:inline">Catálogo</span>
+            </Link>
+          </Button>
+          
+          <Button
+            variant={location.pathname.startsWith("/blog") ? "secondary" : "ghost"}
+            size="sm"
+            asChild
+          >
+            <Link to="/blog" className="gap-2">
+              <BookOpen className="h-4 w-4" />
+              <span className="hidden sm:inline">Blog</span>
             </Link>
           </Button>
           
