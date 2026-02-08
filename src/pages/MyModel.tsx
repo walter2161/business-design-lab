@@ -1,5 +1,6 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 import {
   ArrowLeft,
   Target,
@@ -32,6 +33,8 @@ import { RelatedArticles, BlogSection } from "@/components/BlogComponents";
 import { getRelatedPosts, getPostsByCategory } from "@/data/blog";
 import { PackContentsDisplay } from "@/components/PackContentsDisplay";
 import { sendMistralMessage, getProductAgentPrompt, ChatMessage } from "@/lib/mistralAI";
+
+const MAX_CHAT_MESSAGES = 20;
 
 const MyModel = () => {
   const { id } = useParams();
@@ -125,24 +128,35 @@ ${model.packContents.join(", ")}
 
     const userMessage = aiQuestion.trim();
     setAiQuestion("");
-    setChatHistory(prev => [...prev, { role: "user", content: userMessage }]);
+    
+    // Adiciona mensagem do usuário com limite de 20
+    setChatHistory(prev => {
+      const newHistory = [...prev, { role: "user" as const, content: userMessage }];
+      return newHistory.slice(-MAX_CHAT_MESSAGES);
+    });
     setIsAiLoading(true);
 
-    // Prepara histórico para API
+    // Prepara histórico para API (últimas 20 mensagens)
     const apiHistory: ChatMessage[] = [
-      ...chatHistory.map(m => ({ role: m.role, content: m.content })),
+      ...chatHistory.slice(-MAX_CHAT_MESSAGES).map(m => ({ role: m.role, content: m.content })),
       { role: "user" as const, content: userMessage }
     ];
 
     const response = await sendMistralMessage(apiHistory, systemPrompt);
 
     if (response.success) {
-      setChatHistory(prev => [...prev, { role: "assistant", content: response.content }]);
+      setChatHistory(prev => {
+        const newHistory = [...prev, { role: "assistant" as const, content: response.content }];
+        return newHistory.slice(-MAX_CHAT_MESSAGES);
+      });
     } else {
-      setChatHistory(prev => [...prev, { 
-        role: "assistant", 
-        content: "Desculpe, ocorreu um erro na comunicação. Tente novamente em alguns segundos." 
-      }]);
+      setChatHistory(prev => {
+        const newHistory = [...prev, { 
+          role: "assistant" as const, 
+          content: "Desculpe, ocorreu um erro na comunicação. Tente novamente em alguns segundos." 
+        }];
+        return newHistory.slice(-MAX_CHAT_MESSAGES);
+      });
     }
 
     setIsAiLoading(false);
@@ -336,7 +350,13 @@ ${model.packContents.join(", ")}
                           : "bg-muted text-foreground mr-8"
                       }`}
                     >
-                      {msg.content}
+                      {msg.role === "assistant" ? (
+                        <div className="prose prose-sm dark:prose-invert max-w-none [&_a]:text-accent [&_a]:underline [&_a]:font-medium [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5 [&_strong]:text-foreground">
+                          <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        </div>
+                      ) : (
+                        msg.content
+                      )}
                     </div>
                   ))}
                   {isAiLoading && (

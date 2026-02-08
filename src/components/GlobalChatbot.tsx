@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { models } from "@/data/models";
 import { sendMistralMessage, getStoreChatbotPrompt, ChatMessage } from "@/lib/mistralAI";
 
+const MAX_CHAT_MESSAGES = 20;
+
 const GlobalChatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -35,24 +37,35 @@ const GlobalChatbot = () => {
 
     const userMessage = input.trim();
     setInput("");
-    setMessages(prev => [...prev, { role: "user", content: userMessage }]);
+    
+    // Adiciona mensagem do usuário com limite de 20
+    setMessages(prev => {
+      const newMessages = [...prev, { role: "user" as const, content: userMessage }];
+      return newMessages.slice(-MAX_CHAT_MESSAGES);
+    });
     setIsLoading(true);
 
-    // Prepara histórico para API
+    // Prepara histórico para API (últimas 20 mensagens)
     const chatHistory: ChatMessage[] = [
-      ...messages.map(m => ({ role: m.role, content: m.content })),
+      ...messages.slice(-MAX_CHAT_MESSAGES).map(m => ({ role: m.role, content: m.content })),
       { role: "user" as const, content: userMessage }
     ];
 
     const response = await sendMistralMessage(chatHistory, systemPrompt);
 
     if (response.success) {
-      setMessages(prev => [...prev, { role: "assistant", content: response.content }]);
+      setMessages(prev => {
+        const newMessages = [...prev, { role: "assistant" as const, content: response.content }];
+        return newMessages.slice(-MAX_CHAT_MESSAGES);
+      });
     } else {
-      setMessages(prev => [...prev, { 
-        role: "assistant", 
-        content: "Desculpe, ocorreu um erro. Tente novamente ou entre em contato pelo email contato@lojadenegocios.com.br" 
-      }]);
+      setMessages(prev => {
+        const newMessages = [...prev, { 
+          role: "assistant" as const, 
+          content: "Desculpe, ocorreu um erro. Tente novamente ou entre em contato pelo email contato@lojadenegocios.com.br" 
+        }];
+        return newMessages.slice(-MAX_CHAT_MESSAGES);
+      });
     }
 
     setIsLoading(false);
