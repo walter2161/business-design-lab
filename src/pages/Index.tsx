@@ -1,12 +1,67 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useMemo } from "react";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import Header from "@/components/Header";
+import HeroSection from "@/components/HeroSection";
+import CategoryFilter from "@/components/CategoryFilter";
+import ModelCard from "@/components/ModelCard";
+import { models, type Category } from "@/data/models";
 
 const Index = () => {
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+
+  const filtered = useMemo(() => {
+    return models.filter((m) => {
+      const matchesCategory = !selectedCategory || m.category === selectedCategory;
+      const matchesSearch =
+        !search ||
+        m.name.toLowerCase().includes(search.toLowerCase()) ||
+        m.shortDescription.toLowerCase().includes(search.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [search, selectedCategory]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Header />
+      <HeroSection />
+
+      <main id="catalogo" className="container mx-auto px-4 py-12">
+        {/* Filters */}
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <CategoryFilter selected={selectedCategory} onSelect={setSelectedCategory} />
+          <div className="relative w-full md:w-72">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar modelo..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        </div>
+
+        {/* Grid */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((model) => (
+            <ModelCard key={model.id} model={model} />
+          ))}
+        </div>
+
+        {filtered.length === 0 && (
+          <div className="py-20 text-center">
+            <p className="text-lg text-muted-foreground">Nenhum modelo encontrado.</p>
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border bg-card py-8">
+        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+          © 2026 Loja de Negócio. Todos os direitos reservados.
+        </div>
+      </footer>
     </div>
   );
 };
