@@ -34,12 +34,80 @@ const STORAGE_KEY = 'loja_negocio_auth';
 const USERS_STORAGE_KEY = 'loja_negocio_users';
 const CREDENTIALS_STORAGE_KEY = 'loja_negocio_credentials';
 
+// Usuários demo padrão
+const DEFAULT_DEMO_USERS: Record<string, User> = {
+  admin: {
+    id: 'admin-demo',
+    username: 'admin',
+    name: 'Administrador',
+    email: 'admin@lojadenegocios.com.br',
+    role: 'admin',
+    credits: 9999,
+    purchasedModels: ['salao-beleza', 'barbearia', 'pet-shop', 'ecommerce-generalista'],
+  },
+  user: {
+    id: 'user-demo',
+    username: 'user',
+    name: 'Usuário Demo',
+    email: 'user@demo.com',
+    role: 'user',
+    credits: 500,
+    purchasedModels: ['salao-beleza'],
+  },
+};
+
+const DEFAULT_DEMO_CREDENTIALS: Record<string, StoredUserData> = {
+  admin: {
+    password: '1234',
+    role: 'admin',
+    name: 'Administrador',
+    email: 'admin@lojadenegocios.com.br',
+  },
+  user: {
+    password: '1234',
+    role: 'user',
+    name: 'Usuário Demo',
+    email: 'user@demo.com',
+  },
+};
+
+const initializeDemoUsers = () => {
+  const credentials = localStorage.getItem(CREDENTIALS_STORAGE_KEY);
+  const users = localStorage.getItem(USERS_STORAGE_KEY);
+  
+  // Se não existir ou estiver vazio, inicializa com demos
+  if (!credentials || credentials === '{}') {
+    localStorage.setItem(CREDENTIALS_STORAGE_KEY, JSON.stringify(DEFAULT_DEMO_CREDENTIALS));
+  } else {
+    // Garante que os demos sempre existam
+    const parsed = JSON.parse(credentials);
+    if (!parsed.admin) {
+      parsed.admin = DEFAULT_DEMO_CREDENTIALS.admin;
+      localStorage.setItem(CREDENTIALS_STORAGE_KEY, JSON.stringify(parsed));
+    }
+  }
+  
+  if (!users || users === '{}') {
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(DEFAULT_DEMO_USERS));
+  } else {
+    // Garante que os demos sempre existam
+    const parsed = JSON.parse(users);
+    if (!parsed.admin) {
+      parsed.admin = DEFAULT_DEMO_USERS.admin;
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(parsed));
+    }
+  }
+};
+
+// Inicializa demos ao carregar
+initializeDemoUsers();
+
 const getStoredCredentials = (): Record<string, StoredUserData> => {
   const stored = localStorage.getItem(CREDENTIALS_STORAGE_KEY);
   if (stored) {
     return JSON.parse(stored);
   }
-  return {};
+  return DEFAULT_DEMO_CREDENTIALS;
 };
 
 const saveCredentials = (credentials: Record<string, StoredUserData>) => {
@@ -51,7 +119,7 @@ const getStoredUsers = (): Record<string, User> => {
   if (stored) {
     return JSON.parse(stored);
   }
-  return {};
+  return DEFAULT_DEMO_USERS;
 };
 
 const saveUsers = (users: Record<string, User>) => {
