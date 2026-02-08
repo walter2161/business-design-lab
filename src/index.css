@@ -92,13 +92,48 @@
     @apply border-border;
   }
 
+  html {
+    font-size: 18px; /* Base aumentada de 16px para 18px */
+  }
+
+  @media (max-width: 640px) {
+    html {
+      font-size: 16px; /* Mobile mantém 16px */
+    }
+  }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.6;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl;
+  }
+
+  p, span, li {
+    @apply text-base;
+  }
+
+  .text-sm {
+    font-size: 0.9rem !important;
+  }
+
+  .text-xs {
+    font-size: 0.8rem !important;
   }
 }
 
