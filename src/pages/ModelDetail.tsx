@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { models, categoryIcons } from "@/data/models";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -104,89 +105,91 @@ const ModelDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      {/* Hero */}
-      <section className="bg-navy-gradient">
-        <div className="container mx-auto px-4 py-12 md:py-16">
-          <Link
-            to="/"
-            className="mb-6 inline-flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Voltar ao catálogo
-          </Link>
-          <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-            <div className="max-w-2xl">
-              <Badge className="mb-4 border-0 bg-accent/20 text-amber font-medium">
-                {categoryIcons[model.category]} {model.category}
-              </Badge>
-              <h1 className="mb-3 font-display text-3xl font-bold text-primary-foreground md:text-4xl lg:text-5xl">
-                {model.name}
-              </h1>
-              <p className="text-lg text-primary-foreground/70 leading-relaxed">
-                {model.shortDescription}
-              </p>
-            </div>
-            {/* CTA Card */}
-            <div className="w-full shrink-0 rounded-xl border border-primary-foreground/10 bg-primary-foreground/5 p-6 backdrop-blur-sm md:w-80">
+      {/* Hero with Cover Image */}
+      <section className="relative h-64 md:h-80 overflow-hidden">
+        <img
+          src={model.image}
+          alt={model.name}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/40" />
+        <div className="absolute inset-0 flex items-end">
+          <div className="container mx-auto px-4 pb-6">
+            <Link
+              to="/"
+              className="mb-4 inline-flex items-center gap-2 text-sm text-foreground/60 hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar ao catálogo
+            </Link>
+            <Badge className="mb-3 border-0 bg-accent/20 text-amber font-medium">
+              {categoryIcons[model.category]} {model.category}
+            </Badge>
+            <h1 className="font-display text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
+              {model.name}
+            </h1>
+            <p className="mt-2 text-foreground/70 max-w-2xl">
+              {model.shortDescription}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-card border-b border-border">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-4">
               {isAuthenticated && user && (
-                <div className="mb-3 flex items-center gap-2 text-primary-foreground/60">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <Coins className="h-4 w-4" />
                   <span className="text-sm">{user.credits} créditos</span>
                 </div>
               )}
-              <div className="mb-1 text-sm text-primary-foreground/50">
-                {hasPurchased ? "Você já possui" : "Pagamento único"}
-              </div>
-              <div className="mb-2 flex items-baseline gap-2">
+              <div className="flex items-baseline gap-2">
                 {appliedCoupon ? (
                   <>
-                    <span className="font-display text-4xl font-bold text-amber">
+                    <span className="font-display text-3xl font-bold text-foreground">
                       R$ {appliedCoupon.finalPrice}
                     </span>
-                    <span className="text-lg text-primary-foreground/50 line-through">
+                    <span className="text-lg text-muted-foreground line-through">
                       R$ {model.price}
                     </span>
                   </>
                 ) : (
-                  <span className="font-display text-4xl font-bold text-amber">
+                  <span className="font-display text-3xl font-bold text-foreground">
                     R$ {model.price}
                   </span>
                 )}
               </div>
-              
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
               {/* Coupon input */}
               {!hasPurchased && (
-                <div className="mb-4 space-y-2">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Cupom de desconto"
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                      className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleApplyCoupon()}
-                      className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10"
-                    >
-                      <Tag className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  {applicableCoupons.length > 0 && (
-                    <div className="text-xs text-primary-foreground/50">
-                      💡 Cupom disponível: <button onClick={() => handleApplyCoupon(applicableCoupons[0].code)} className="text-amber underline">{applicableCoupons[0].code}</button>
-                    </div>
-                  )}
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Cupom de desconto"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    className="w-40"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleApplyCoupon()}
+                  >
+                    <Tag className="h-4 w-4" />
+                  </Button>
                 </div>
               )}
               
               <Button 
                 onClick={handlePurchase}
-                className="w-full gap-2 bg-accent text-accent-foreground hover:bg-accent/90 font-display font-semibold"
+                className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90 font-display font-semibold"
                 disabled={isAuthenticated && !canAfford && !hasPurchased}
               >
                 {hasPurchased ? (
@@ -201,13 +204,14 @@ const ModelDetail = () => {
                   </>
                 )}
               </Button>
-              <p className="mt-3 text-xs text-center text-primary-foreground/40">
-                {hasPurchased 
-                  ? "Acesse todo o conteúdo exclusivo" 
-                  : "Acesso imediato após o pagamento"}
-              </p>
             </div>
           </div>
+          
+          {applicableCoupons.length > 0 && !hasPurchased && (
+            <div className="mt-3 text-xs text-muted-foreground">
+              💡 Cupom disponível: <button onClick={() => handleApplyCoupon(applicableCoupons[0].code)} className="text-accent underline">{applicableCoupons[0].code}</button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -495,11 +499,7 @@ const ModelDetail = () => {
         </div>
       </div>
 
-      <footer className="border-t border-border bg-card py-8 lg:block hidden">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026 Loja de Negócio. Todos os direitos reservados.
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

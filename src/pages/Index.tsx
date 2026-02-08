@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import CategoryFilter from "@/components/CategoryFilter";
 import ModelCard from "@/components/ModelCard";
+import Footer from "@/components/Footer";
 import { PromotionBanner, ActiveCoupons } from "@/components/PromotionComponents";
 import { BlogSection } from "@/components/BlogComponents";
 import { models, type Category } from "@/data/models";
@@ -25,14 +26,14 @@ const Index = () => {
   }, [search, selectedCategory]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Promotion Banner */}
       <PromotionBanner />
       
       <Header />
       <HeroSection />
 
-      <main id="catalogo" className="container mx-auto px-4 py-12">
+      <main id="catalogo" className="flex-1 container mx-auto px-4 py-12">
         {/* Active Coupons Section */}
         <div className="mb-8">
           <ActiveCoupons />
@@ -71,12 +72,7 @@ const Index = () => {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-card py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026 Loja de Negócio. Todos os direitos reservados.
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

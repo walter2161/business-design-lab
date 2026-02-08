@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { BlogCard } from "@/components/BlogComponents";
 import { blogPosts, getPostsByCategory, getRecentPosts } from "@/data/blog";
 import { categoryIcons } from "@/data/models";
@@ -14,14 +15,15 @@ const BlogPost = () => {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <Header />
-        <div className="container mx-auto px-4 py-20 text-center">
+        <div className="flex-1 container mx-auto px-4 py-20 text-center">
           <p className="text-lg text-muted-foreground">Artigo não encontrado.</p>
           <Button asChild className="mt-4">
             <Link to="/blog">Voltar ao blog</Link>
           </Button>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -31,7 +33,7 @@ const BlogPost = () => {
     .slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
       {/* Hero */}
@@ -62,7 +64,7 @@ const BlogPost = () => {
       </section>
 
       {/* Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-8">
         <div className="grid gap-8 lg:grid-cols-3">
           <article className="lg:col-span-2">
             {/* Meta */}
@@ -189,11 +191,7 @@ const BlogPost = () => {
         </div>
       </main>
 
-      <footer className="border-t border-border bg-card py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026 Loja de Negócio. Todos os direitos reservados.
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
