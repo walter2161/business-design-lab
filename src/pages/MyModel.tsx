@@ -21,6 +21,7 @@ import {
   Key,
   FileText,
   HelpCircle,
+  HardDrive,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,9 +31,8 @@ import Footer from "@/components/Footer";
 import { models, categoryIcons } from "@/data/models";
 import { useAuth } from "@/contexts/AuthContext";
 import { RelatedArticles } from "@/components/BlogComponents";
-import { PackContentsDisplay } from "@/components/PackContentsDisplay";
 import ChatGPTStyleChat from "@/components/ChatGPTStyleChat";
-import OnHubLicenseCard from "@/components/OnHubLicenseCard";
+import ProductDrive from "@/components/ProductDrive";
 import { sendMistralMessage, getProductAgentPrompt, ChatMessage } from "@/lib/mistralAI";
 import { cn } from "@/lib/utils";
 
@@ -231,14 +231,25 @@ ${model.packContents.join(", ")}
               ))}
             </nav>
 
-            {/* Quick Access - Compact */}
+            {/* Quick Access - Drive */}
             <div className="p-3 border-t border-border mt-4">
-              <OnHubLicenseCard
-                productId={model.id}
-                productName={model.name}
-                userId={user?.id}
-                compact
-              />
+              <div className="rounded-lg border border-accent/30 bg-gradient-to-br from-accent/5 to-transparent p-3 space-y-3">
+                <div className="flex items-center gap-2">
+                  <HardDrive className="h-4 w-4 text-accent shrink-0" />
+                  <span className="font-semibold text-sm text-foreground">Seu Drive</span>
+                  <Badge className="bg-accent/20 text-accent border-0 text-xs ml-auto">
+                    30 arquivos
+                  </Badge>
+                </div>
+                <Button
+                  size="sm"
+                  className="w-full gap-2 bg-accent text-accent-foreground hover:bg-accent/90 text-xs"
+                  onClick={() => handleTabChange("files")}
+                >
+                  Acessar arquivos
+                  <Package className="h-3 w-3" />
+                </Button>
+              </div>
             </div>
           </div>
         </aside>
@@ -377,13 +388,25 @@ ${model.packContents.join(", ")}
                   </div>
                 </Section>
 
-                {/* Mobile onHub Card */}
+                {/* Mobile Drive Card */}
                 <div className="lg:hidden">
-                  <OnHubLicenseCard
-                    productId={model.id}
-                    productName={model.name}
-                    userId={user?.id}
-                  />
+                  <div className="rounded-lg border border-accent/30 bg-gradient-to-br from-accent/5 to-transparent p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <HardDrive className="h-5 w-5 text-accent shrink-0" />
+                      <span className="font-semibold text-foreground">Seu Drive</span>
+                      <Badge className="bg-accent/20 text-accent border-0 text-xs ml-auto">
+                        30 arquivos
+                      </Badge>
+                    </div>
+                    <Button
+                      size="sm"
+                      className="w-full gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
+                      onClick={() => handleTabChange("files")}
+                    >
+                      Acessar arquivos
+                      <Package className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
@@ -397,33 +420,12 @@ ${model.packContents.join(", ")}
                       Arquivos do Modelo
                     </h1>
                     <p className="text-muted-foreground">
-                      Todos os templates, planilhas e documentos do seu pack
+                      Todos os documentos e planilhas do seu pack
                     </p>
                   </div>
                 </div>
 
-                {/* onHub Notice */}
-                <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 flex items-start gap-4">
-                  <div className="h-10 w-10 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
-                    <Key className="h-5 w-5 text-accent" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground mb-1">
-                      Arquivos disponíveis no onHub.app
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Seus arquivos foram enviados automaticamente para sua conta onHub. 
-                      Acesse online ou baixe para editar localmente.
-                    </p>
-                    <Button variant="outline" size="sm" asChild>
-                      <a href="https://onhub.app" target="_blank" rel="noopener noreferrer">
-                        Acessar onHub.app
-                      </a>
-                    </Button>
-                  </div>
-                </div>
-
-                <PackContentsDisplay modelName={model.name} />
+                <ProductDrive modelName={model.name} />
               </div>
             )}
 
@@ -574,7 +576,7 @@ ${model.packContents.join(", ")}
                 <Section icon={<Rocket className="h-5 w-5" />} title="Próximos Passos">
                   <div className="space-y-3">
                     {[
-                      { title: "Acesse seus arquivos no onHub", desc: "Entre no onHub.app e familiarize-se com os templates." },
+                      { title: "Acesse seus arquivos no Drive", desc: "Baixe os templates e planilhas para editar localmente." },
                       { title: "Personalize para seu contexto", desc: "Adapte os templates com seus dados, preços e informações locais." },
                       { title: "Use o Consultor IA", desc: "Tire dúvidas específicas sobre implementação." },
                       { title: "Siga o Delta T", desc: "Respeite o cronograma sugerido para implementação gradual." },
@@ -632,7 +634,7 @@ ${model.packContents.join(", ")}
                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
                           Inclui
                         </p>
-                        <p className="text-foreground">Atualizações + onHub Premium</p>
+                        <p className="text-foreground">Atualizações + Drive de Arquivos</p>
                       </div>
                     </div>
                   </div>
