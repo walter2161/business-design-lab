@@ -10,6 +10,8 @@ import ModelDetail from "./pages/ModelDetail";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import MyModel from "./pages/MyModel";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +27,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/modelo/:id" element={<ModelDetail />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:id" element={<BlogPost />} />
             <Route
               path="/dashboard"
               element={

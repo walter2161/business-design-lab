@@ -1,4 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import {
   ArrowLeft,
   Target,
@@ -13,14 +14,19 @@ import {
   AlertCircle,
   CheckCircle2,
   Coins,
+  Tag,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import Header from "@/components/Header";
 import { models, categoryIcons } from "@/data/models";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { CouponCard, CouponTimer } from "@/components/PromotionComponents";
+import { RelatedArticles } from "@/components/BlogComponents";
+import { coupons, applyCoupon, isPromotionActive, getApplicableCoupons } from "@/data/promotions";
 
 const ModelDetail = () => {
   const { id } = useParams();
@@ -28,8 +34,29 @@ const ModelDetail = () => {
   const { user, isAuthenticated, purchaseModel } = useAuth();
   const model = models.find((m) => m.id === id);
   
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ discount: number; finalPrice: number } | null>(null);
+  
   const hasPurchased = user?.purchasedModels.includes(id || "");
-  const canAfford = (user?.credits || 0) >= (model?.price || 0);
+  const basePrice = model?.price || 0;
+  const finalPrice = appliedCoupon ? appliedCoupon.finalPrice : basePrice;
+  const canAfford = (user?.credits || 0) >= finalPrice;
+  
+  const applicableCoupons = model ? getApplicableCoupons(model.id, model.category) : [];
+
+  const handleApplyCoupon = (code?: string) => {
+    const codeToApply = code || couponCode;
+    if (!codeToApply.trim() || !model) return;
+    
+    const result = applyCoupon(model.price, codeToApply);
+    if (result.valid) {
+      setAppliedCoupon({ discount: result.discount, finalPrice: result.finalPrice });
+      setCouponCode(codeToApply.toUpperCase());
+      toast.success(result.message);
+    } else {
+      toast.error(result.message);
+    }
+  };
 
   const handlePurchase = () => {
     if (!isAuthenticated) {
@@ -50,9 +77,10 @@ const ModelDetail = () => {
       return;
     }
     
-    const success = purchaseModel(model.id, model.price);
+    const success = purchaseModel(model.id, finalPrice);
     if (success) {
       toast.success(`${model.name} adquirido com sucesso!`);
+      setAppliedCoupon(null);
       navigate(`/meu-modelo/${model.id}`);
     } else {
       toast.error("Erro ao processar compra");
@@ -100,7 +128,7 @@ const ModelDetail = () => {
               </p>
             </div>
             {/* CTA Card */}
-            <div className="w-full shrink-0 rounded-xl border border-primary-foreground/10 bg-primary-foreground/5 p-6 backdrop-blur-sm md:w-72">
+            <div className="w-full shrink-0 rounded-xl border border-primary-foreground/10 bg-primary-foreground/5 p-6 backdrop-blur-sm md:w-80">
               {isAuthenticated && user && (
                 <div className="mb-3 flex items-center gap-2 text-primary-foreground/60">
                   <Coins className="h-4 w-4" />
@@ -110,9 +138,50 @@ const ModelDetail = () => {
               <div className="mb-1 text-sm text-primary-foreground/50">
                 {hasPurchased ? "Você já possui" : "Pagamento único"}
               </div>
-              <div className="mb-4 font-display text-4xl font-bold text-amber">
-                R$ {model.price}
+              <div className="mb-2 flex items-baseline gap-2">
+                {appliedCoupon ? (
+                  <>
+                    <span className="font-display text-4xl font-bold text-amber">
+                      R$ {appliedCoupon.finalPrice}
+                    </span>
+                    <span className="text-lg text-primary-foreground/50 line-through">
+                      R$ {model.price}
+                    </span>
+                  </>
+                ) : (
+                  <span className="font-display text-4xl font-bold text-amber">
+                    R$ {model.price}
+                  </span>
+                )}
               </div>
+              
+              {/* Coupon input */}
+              {!hasPurchased && (
+                <div className="mb-4 space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Cupom de desconto"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleApplyCoupon()}
+                      className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10"
+                    >
+                      <Tag className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {applicableCoupons.length > 0 && (
+                    <div className="text-xs text-primary-foreground/50">
+                      💡 Cupom disponível: <button onClick={() => handleApplyCoupon(applicableCoupons[0].code)} className="text-amber underline">{applicableCoupons[0].code}</button>
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <Button 
                 onClick={handlePurchase}
                 className="w-full gap-2 bg-accent text-accent-foreground hover:bg-accent/90 font-display font-semibold"
@@ -126,7 +195,7 @@ const ModelDetail = () => {
                 ) : (
                   <>
                     <ShoppingCart className="h-4 w-4" />
-                    {isAuthenticated ? `Comprar (${model.price} créditos)` : "Comprar modelo"}
+                    {isAuthenticated ? `Comprar (${finalPrice} créditos)` : "Comprar modelo"}
                   </>
                 )}
               </Button>
@@ -297,55 +366,91 @@ const ModelDetail = () => {
 
           {/* Sticky CTA sidebar */}
           <div className="hidden lg:block">
-            <div className="sticky top-24 rounded-xl border border-border bg-card p-6">
-              {isAuthenticated && user && (
-                <div className="mb-3 flex items-center gap-2 text-muted-foreground">
-                  <Coins className="h-4 w-4" />
-                  <span className="text-sm">{user.credits} créditos disponíveis</span>
+            <div className="sticky top-24 space-y-6">
+              <div className="rounded-xl border border-border bg-card p-6">
+                {isAuthenticated && user && (
+                  <div className="mb-3 flex items-center gap-2 text-muted-foreground">
+                    <Coins className="h-4 w-4" />
+                    <span className="text-sm">{user.credits} créditos disponíveis</span>
+                  </div>
+                )}
+                <div className="mb-1 text-sm text-muted-foreground">
+                  {hasPurchased ? "Você já possui" : "Pagamento único"}
+                </div>
+                <div className="mb-2 flex items-baseline gap-2">
+                  {appliedCoupon ? (
+                    <>
+                      <span className="font-display text-4xl font-bold text-foreground">
+                        R$ {appliedCoupon.finalPrice}
+                      </span>
+                      <span className="text-lg text-muted-foreground line-through">
+                        R$ {model.price}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="font-display text-4xl font-bold text-foreground">
+                      R$ {model.price}
+                    </span>
+                  )}
+                </div>
+                <Button 
+                  onClick={handlePurchase}
+                  className="w-full gap-2 bg-accent text-accent-foreground hover:bg-accent/90 font-display font-semibold mb-4"
+                  disabled={isAuthenticated && !canAfford && !hasPurchased}
+                >
+                  {hasPurchased ? (
+                    <>
+                      <Package className="h-4 w-4" />
+                      Acessar modelo
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-4 w-4" />
+                      {isAuthenticated ? `Comprar` : "Comprar modelo"}
+                    </>
+                  )}
+                </Button>
+                <Separator className="my-4" />
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-accent" />
+                    Acesso imediato
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-accent" />
+                    {model.packContents.length} arquivos inclusos
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-accent" />
+                    IA especialista inclusa
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-accent" />
+                    Atualizações gratuitas
+                  </div>
+                </div>
+              </div>
+              
+              {/* Available Coupons */}
+              {!hasPurchased && applicableCoupons.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <Tag className="h-4 w-4 text-accent" />
+                    Cupons Disponíveis
+                  </h4>
+                  {applicableCoupons.slice(0, 2).map(coupon => (
+                    <CouponCard 
+                      key={coupon.id} 
+                      coupon={coupon} 
+                      onApply={handleApplyCoupon}
+                      compact 
+                    />
+                  ))}
                 </div>
               )}
-              <div className="mb-1 text-sm text-muted-foreground">
-                {hasPurchased ? "Você já possui" : "Pagamento único"}
-              </div>
-              <div className="mb-4 font-display text-4xl font-bold text-foreground">
-                R$ {model.price}
-              </div>
-              <Button 
-                onClick={handlePurchase}
-                className="w-full gap-2 bg-accent text-accent-foreground hover:bg-accent/90 font-display font-semibold mb-4"
-                disabled={isAuthenticated && !canAfford && !hasPurchased}
-              >
-                {hasPurchased ? (
-                  <>
-                    <Package className="h-4 w-4" />
-                    Acessar modelo
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart className="h-4 w-4" />
-                    {isAuthenticated ? `Comprar` : "Comprar modelo"}
-                  </>
-                )}
-              </Button>
-              <Separator className="my-4" />
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <CheckCircle2 className="h-4 w-4 text-accent" />
-                  Acesso imediato
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <CheckCircle2 className="h-4 w-4 text-accent" />
-                  {model.packContents.length} arquivos inclusos
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <CheckCircle2 className="h-4 w-4 text-accent" />
-                  IA especialista inclusa
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <CheckCircle2 className="h-4 w-4 text-accent" />
-                  Atualizações gratuitas
-                </div>
-              </div>
+              
+              {/* Related Articles */}
+              <RelatedArticles modelId={model.id} category={model.category} />
             </div>
           </div>
         </div>
@@ -358,7 +463,22 @@ const ModelDetail = () => {
             <div className="text-xs text-muted-foreground">
               {hasPurchased ? "Você já possui" : "Pagamento único"}
             </div>
-            <div className="font-display text-2xl font-bold text-foreground">R$ {model.price}</div>
+            <div className="flex items-baseline gap-2">
+              {appliedCoupon ? (
+                <>
+                  <span className="font-display text-2xl font-bold text-foreground">
+                    R$ {appliedCoupon.finalPrice}
+                  </span>
+                  <span className="text-sm text-muted-foreground line-through">
+                    R$ {model.price}
+                  </span>
+                </>
+              ) : (
+                <span className="font-display text-2xl font-bold text-foreground">
+                  R$ {model.price}
+                </span>
+              )}
+            </div>
           </div>
           <Button 
             onClick={handlePurchase}

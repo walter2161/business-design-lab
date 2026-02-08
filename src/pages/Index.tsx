@@ -5,6 +5,8 @@ import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import CategoryFilter from "@/components/CategoryFilter";
 import ModelCard from "@/components/ModelCard";
+import { PromotionBanner, ActiveCoupons } from "@/components/PromotionComponents";
+import { BlogSection } from "@/components/BlogComponents";
 import { models, type Category } from "@/data/models";
 
 const Index = () => {
@@ -24,10 +26,18 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Promotion Banner */}
+      <PromotionBanner />
+      
       <Header />
       <HeroSection />
 
       <main id="catalogo" className="container mx-auto px-4 py-12">
+        {/* Active Coupons Section */}
+        <div className="mb-8">
+          <ActiveCoupons />
+        </div>
+
         {/* Filters */}
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <CategoryFilter selected={selectedCategory} onSelect={setSelectedCategory} />
@@ -54,6 +64,11 @@ const Index = () => {
             <p className="text-lg text-muted-foreground">Nenhum modelo encontrado.</p>
           </div>
         )}
+
+        {/* Blog Section */}
+        <div className="mt-16">
+          <BlogSection title="Conteúdos para Empreendedores" limit={3} />
+        </div>
       </main>
 
       {/* Footer */}
