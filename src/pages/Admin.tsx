@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import {
   Package,
@@ -13,6 +13,12 @@ import {
   BarChart3,
   TrendingUp,
   DollarSign,
+  Tag,
+  Percent,
+  Plus,
+  Trash2,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,10 +43,33 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
-import { models, categoryIcons, type BusinessModel } from "@/data/models";
+import { models, categoryIcons, categories, type BusinessModel, type Category } from "@/data/models";
+import { 
+  getCoupons, 
+  getPromotions, 
+  saveCoupons, 
+  savePromotions,
+  addCoupon,
+  updateCoupon,
+  deleteCoupon,
+  addPromotion,
+  updatePromotion,
+  deletePromotion,
+  isPromotionActive,
+  type Coupon,
+  type Promotion,
+} from "@/data/promotions";
 import { toast } from "sonner";
 
 const Admin = () => {
@@ -48,6 +77,22 @@ const Admin = () => {
   const [searchProducts, setSearchProducts] = useState("");
   const [searchUsers, setSearchUsers] = useState("");
   const [editingProduct, setEditingProduct] = useState<BusinessModel | null>(null);
+  
+  // Cupons e promoções
+  const [coupons, setCoupons] = useState<Coupon[]>(getCoupons());
+  const [promotions, setPromotions] = useState<Promotion[]>(getPromotions());
+  const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
+  const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
+  const [newCoupon, setNewCoupon] = useState<Partial<Coupon>>({
+    code: "",
+    discount: 10,
+    description: "",
+    expiresAt: "",
+    isRecurring: false,
+    isActive: true,
+  });
+  const [showNewCouponDialog, setShowNewCouponDialog] = useState(false);
+  
   const [seoData, setSeoData] = useState({
     siteTitle: "Loja de Negócios",
     siteDescription: "Modelos de negócio validados para empreendedores brasileiros. Encontre o modelo perfeito para começar seu negócio.",
@@ -58,6 +103,12 @@ const Admin = () => {
     facebookPixelId: "",
     canonicalUrl: "https://lojadenegocios.com.br",
   });
+
+  // Refresh coupons and promotions
+  const refreshData = () => {
+    setCoupons(getCoupons());
+    setPromotions(getPromotions());
+  };
 
   // Redirect if not admin
   if (!isAuthenticated || user?.role !== "admin") {
@@ -169,18 +220,22 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
             <TabsTrigger value="products" className="gap-2">
               <Package className="h-4 w-4" />
-              Produtos
+              <span className="hidden sm:inline">Produtos</span>
+            </TabsTrigger>
+            <TabsTrigger value="promotions" className="gap-2">
+              <Tag className="h-4 w-4" />
+              <span className="hidden sm:inline">Promoções</span>
             </TabsTrigger>
             <TabsTrigger value="users" className="gap-2">
               <Users className="h-4 w-4" />
-              Usuários
+              <span className="hidden sm:inline">Usuários</span>
             </TabsTrigger>
             <TabsTrigger value="seo" className="gap-2">
               <Globe className="h-4 w-4" />
-              SEO
+              <span className="hidden sm:inline">SEO</span>
             </TabsTrigger>
           </TabsList>
 
@@ -254,6 +309,192 @@ const Admin = () => {
                     Mostrando 20 de {filteredProducts.length} produtos
                   </p>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Promotions Tab */}
+          <TabsContent value="promotions" className="space-y-4">
+            {/* Coupons Section */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Tag className="h-5 w-5" />
+                      Cupons de Desconto
+                    </CardTitle>
+                    <CardDescription>
+                      Gerencie cupons ativos e crie novas promoções.
+                    </CardDescription>
+                  </div>
+                  <Button onClick={() => setShowNewCouponDialog(true)} className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Novo Cupom
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Código</TableHead>
+                        <TableHead>Desconto</TableHead>
+                        <TableHead>Descrição</TableHead>
+                        <TableHead>Expiração</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Usos</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {coupons.map((coupon) => (
+                        <TableRow key={coupon.id}>
+                          <TableCell>
+                            <code className="rounded bg-muted px-2 py-1 font-mono font-semibold">
+                              {coupon.code}
+                            </code>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="bg-accent/20 text-accent">
+                              {coupon.discount}% OFF
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="max-w-[200px] truncate">
+                            {coupon.description}
+                          </TableCell>
+                          <TableCell>
+                            <span className={isPromotionActive(coupon.expiresAt) ? "text-foreground" : "text-destructive"}>
+                              {new Date(coupon.expiresAt).toLocaleDateString("pt-BR")}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={coupon.isActive && isPromotionActive(coupon.expiresAt) ? "default" : "secondary"}>
+                              {coupon.isActive && isPromotionActive(coupon.expiresAt) ? "Ativo" : "Inativo"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{coupon.usedCount}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  updateCoupon(coupon.id, { isActive: !coupon.isActive });
+                                  refreshData();
+                                  toast.success(`Cupom ${coupon.isActive ? "desativado" : "ativado"}!`);
+                                }}
+                              >
+                                {coupon.isActive ? (
+                                  <ToggleRight className="h-4 w-4 text-accent" />
+                                ) : (
+                                  <ToggleLeft className="h-4 w-4" />
+                                )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setEditingCoupon(coupon)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  deleteCoupon(coupon.id);
+                                  refreshData();
+                                  toast.success("Cupom excluído!");
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Promotions Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Percent className="h-5 w-5" />
+                  Promoções Ativas
+                </CardTitle>
+                <CardDescription>
+                  Banners e promoções em destaque no site.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Badge</TableHead>
+                        <TableHead>Título</TableHead>
+                        <TableHead>Desconto</TableHead>
+                        <TableHead>Término</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {promotions.map((promo) => (
+                        <TableRow key={promo.id}>
+                          <TableCell>{promo.badge}</TableCell>
+                          <TableCell className="font-medium">{promo.title}</TableCell>
+                          <TableCell>
+                            <Badge variant="secondary">{promo.discount}% OFF</Badge>
+                          </TableCell>
+                          <TableCell>
+                            {new Date(promo.endsAt).toLocaleDateString("pt-BR")}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={promo.isActive && isPromotionActive(promo.endsAt) ? "default" : "secondary"}>
+                              {promo.isActive && isPromotionActive(promo.endsAt) ? "Ativa" : "Inativa"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  updatePromotion(promo.id, { isActive: !promo.isActive });
+                                  refreshData();
+                                  toast.success(`Promoção ${promo.isActive ? "desativada" : "ativada"}!`);
+                                }}
+                              >
+                                {promo.isActive ? (
+                                  <ToggleRight className="h-4 w-4 text-accent" />
+                                ) : (
+                                  <ToggleLeft className="h-4 w-4" />
+                                )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  deletePromotion(promo.id);
+                                  refreshData();
+                                  toast.success("Promoção excluída!");
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -527,6 +768,213 @@ const Admin = () => {
                 <Button onClick={handleSaveProduct}>
                   <Save className="h-4 w-4 mr-2" />
                   Salvar Alterações
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* New Coupon Dialog */}
+      <Dialog open={showNewCouponDialog} onOpenChange={setShowNewCouponDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Criar Novo Cupom</DialogTitle>
+            <DialogDescription>
+              Configure um novo cupom de desconto.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Código do Cupom</Label>
+                <Input
+                  placeholder="EX: DESCONTO20"
+                  value={newCoupon.code || ""}
+                  onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value.toUpperCase() })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Desconto (%)</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={newCoupon.discount || 10}
+                  onChange={(e) => setNewCoupon({ ...newCoupon, discount: Number(e.target.value) })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Descrição</Label>
+              <Input
+                placeholder="Descrição do cupom..."
+                value={newCoupon.description || ""}
+                onChange={(e) => setNewCoupon({ ...newCoupon, description: e.target.value })}
+              />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Validade (horas)</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="24"
+                  onChange={(e) => {
+                    const hours = Number(e.target.value) || 24;
+                    const date = new Date();
+                    date.setHours(date.getHours() + hours);
+                    setNewCoupon({ ...newCoupon, expiresAt: date.toISOString() });
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Compra Mínima (R$)</Label>
+                <Input
+                  type="number"
+                  placeholder="Opcional"
+                  onChange={(e) => setNewCoupon({ ...newCoupon, minPurchase: Number(e.target.value) || undefined })}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="recurring"
+                checked={newCoupon.isRecurring || false}
+                onCheckedChange={(checked) => setNewCoupon({ ...newCoupon, isRecurring: checked })}
+              />
+              <Label htmlFor="recurring">Cupom recorrente</Label>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowNewCouponDialog(false)}>
+                <X className="h-4 w-4 mr-2" />
+                Cancelar
+              </Button>
+              <Button 
+                onClick={() => {
+                  if (!newCoupon.code || !newCoupon.description || !newCoupon.expiresAt) {
+                    toast.error("Preencha todos os campos obrigatórios");
+                    return;
+                  }
+                  addCoupon({
+                    code: newCoupon.code,
+                    discount: newCoupon.discount || 10,
+                    description: newCoupon.description,
+                    expiresAt: newCoupon.expiresAt,
+                    isRecurring: newCoupon.isRecurring || false,
+                    minPurchase: newCoupon.minPurchase,
+                    isActive: true,
+                  });
+                  refreshData();
+                  setShowNewCouponDialog(false);
+                  setNewCoupon({ code: "", discount: 10, description: "", expiresAt: "", isRecurring: false, isActive: true });
+                  toast.success("Cupom criado com sucesso!");
+                }}
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Criar Cupom
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Coupon Dialog */}
+      <Dialog open={!!editingCoupon} onOpenChange={() => setEditingCoupon(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Editar Cupom</DialogTitle>
+            <DialogDescription>
+              Atualize as informações do cupom.
+            </DialogDescription>
+          </DialogHeader>
+          {editingCoupon && (
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Código do Cupom</Label>
+                  <Input
+                    value={editingCoupon.code}
+                    onChange={(e) => setEditingCoupon({ ...editingCoupon, code: e.target.value.toUpperCase() })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Desconto (%)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={editingCoupon.discount}
+                    onChange={(e) => setEditingCoupon({ ...editingCoupon, discount: Number(e.target.value) })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Descrição</Label>
+                <Input
+                  value={editingCoupon.description}
+                  onChange={(e) => setEditingCoupon({ ...editingCoupon, description: e.target.value })}
+                />
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Compra Mínima (R$)</Label>
+                  <Input
+                    type="number"
+                    value={editingCoupon.minPurchase || ""}
+                    onChange={(e) => setEditingCoupon({ ...editingCoupon, minPurchase: Number(e.target.value) || undefined })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Limite de Uso</Label>
+                  <Input
+                    type="number"
+                    value={editingCoupon.usageLimit || ""}
+                    onChange={(e) => setEditingCoupon({ ...editingCoupon, usageLimit: Number(e.target.value) || undefined })}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="edit-recurring"
+                    checked={editingCoupon.isRecurring}
+                    onCheckedChange={(checked) => setEditingCoupon({ ...editingCoupon, isRecurring: checked })}
+                  />
+                  <Label htmlFor="edit-recurring">Recorrente</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="edit-active"
+                    checked={editingCoupon.isActive}
+                    onCheckedChange={(checked) => setEditingCoupon({ ...editingCoupon, isActive: checked })}
+                  />
+                  <Label htmlFor="edit-active">Ativo</Label>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setEditingCoupon(null)}>
+                  <X className="h-4 w-4 mr-2" />
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={() => {
+                    updateCoupon(editingCoupon.id, editingCoupon);
+                    refreshData();
+                    setEditingCoupon(null);
+                    toast.success("Cupom atualizado!");
+                  }}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Salvar
                 </Button>
               </div>
             </div>

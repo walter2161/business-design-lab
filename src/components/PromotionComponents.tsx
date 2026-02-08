@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Timer, Tag, Percent, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { coupons, promotions, getTimeRemaining, isPromotionActive, type Coupon } from "@/data/promotions";
+import { getActivePromotions, getActiveCoupons, getTimeRemaining, isPromotionActive, type Coupon } from "@/data/promotions";
 import { cn } from "@/lib/utils";
 
 interface PromotionBannerProps {
@@ -11,7 +11,16 @@ interface PromotionBannerProps {
 
 export const PromotionBanner = ({ className }: PromotionBannerProps) => {
   const [currentPromo, setCurrentPromo] = useState(0);
-  const activePromotions = promotions.filter(p => p.isActive && isPromotionActive(p.endsAt));
+  const [activePromotions, setActivePromotions] = useState(getActivePromotions());
+
+  useEffect(() => {
+    // Refresh promotions periodically
+    const refreshInterval = setInterval(() => {
+      setActivePromotions(getActivePromotions());
+    }, 60000); // Every minute
+
+    return () => clearInterval(refreshInterval);
+  }, []);
 
   useEffect(() => {
     if (activePromotions.length <= 1) return;
@@ -39,7 +48,7 @@ export const PromotionBanner = ({ className }: PromotionBannerProps) => {
 };
 
 interface CouponTimerProps {
-  expiresAt: Date;
+  expiresAt: string;
   onExpire?: () => void;
 }
 
@@ -78,7 +87,7 @@ interface CouponCardProps {
 export const CouponCard = ({ coupon, onApply, compact = false }: CouponCardProps) => {
   const isActive = isPromotionActive(coupon.expiresAt);
 
-  if (!isActive) return null;
+  if (!isActive || !coupon.isActive) return null;
 
   if (compact) {
     return (
@@ -150,13 +159,21 @@ interface ActiveCouponsProps {
 }
 
 export const ActiveCoupons = ({ categoryFilter, onApply }: ActiveCouponsProps) => {
-  const activeCoupons = coupons.filter(c => {
-    if (!isPromotionActive(c.expiresAt)) return false;
+  const [activeCoupons, setActiveCoupons] = useState(getActiveCoupons());
+
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      setActiveCoupons(getActiveCoupons());
+    }, 60000);
+    return () => clearInterval(refreshInterval);
+  }, []);
+
+  const filteredCoupons = activeCoupons.filter(c => {
     if (categoryFilter && c.applicableCategories && !c.applicableCategories.includes(categoryFilter as any)) return false;
     return true;
   });
 
-  if (activeCoupons.length === 0) return null;
+  if (filteredCoupons.length === 0) return null;
 
   return (
     <div className="space-y-3">
@@ -165,7 +182,7 @@ export const ActiveCoupons = ({ categoryFilter, onApply }: ActiveCouponsProps) =
         Cupons Ativos
       </h3>
       <div className="grid gap-3 sm:grid-cols-2">
-        {activeCoupons.slice(0, 4).map(coupon => (
+        {filteredCoupons.slice(0, 4).map(coupon => (
           <CouponCard key={coupon.id} coupon={coupon} onApply={onApply} />
         ))}
       </div>
