@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Store, Mail, Phone, MapPin, Facebook, Instagram, Twitter, Linkedin, Youtube } from "lucide-react";
+import { Store, Mail, Phone, MapPin, Facebook, Instagram, Twitter, Linkedin, Youtube, Shield } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 const Footer = () => {
@@ -68,14 +68,19 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                  Termos de Uso
-                </a>
+                <Link to="/cadastro" className="text-muted-foreground hover:text-primary transition-colors">
+                  Cadastro
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/termos" className="text-muted-foreground hover:text-primary transition-colors">
+                  Termos de Uso
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacidade" className="text-muted-foreground hover:text-primary transition-colors">
                   Política de Privacidade
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -146,6 +151,21 @@ const Footer = () => {
 
       <Separator />
 
+      {/* LGPD Notice */}
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <Shield className="h-4 w-4 text-primary" />
+          <span>
+            Este site está em conformidade com a LGPD (Lei Geral de Proteção de Dados - Lei nº 13.709/2018).{" "}
+            <Link to="/privacidade" className="text-primary underline hover:text-primary/80">
+              Saiba mais
+            </Link>
+          </span>
+        </div>
+      </div>
+
+      <Separator />
+
       {/* Bottom Footer */}
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
@@ -156,8 +176,8 @@ const Footer = () => {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <a href="#" className="hover:text-primary transition-colors">Termos</a>
-            <a href="#" className="hover:text-primary transition-colors">Privacidade</a>
+            <Link to="/termos" className="hover:text-primary transition-colors">Termos</Link>
+            <Link to="/privacidade" className="hover:text-primary transition-colors">Privacidade</Link>
             <a href="#" className="hover:text-primary transition-colors">Cookies</a>
           </div>
         </div>
