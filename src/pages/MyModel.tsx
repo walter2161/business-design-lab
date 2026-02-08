@@ -47,6 +47,12 @@ const MyModel = () => {
   const [chatHistory, setChatHistory] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
 
+  // Função para mudar aba e rolar ao topo
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab);
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  };
+
   const model = models.find((m) => m.id === id);
 
   // Redireciona se não estiver autenticado
@@ -211,7 +217,7 @@ ${model.packContents.join(", ")}
               {sidebarItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => handleTabChange(item.id)}
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                     activeTab === item.id
@@ -270,7 +276,7 @@ ${model.packContents.join(", ")}
               {sidebarItems.slice(0, 4).map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => handleTabChange(item.id)}
                   className={cn(
                     "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors",
                     activeTab === item.id
@@ -639,7 +645,7 @@ ${model.packContents.join(", ")}
                       Precisa de ajuda? Entre em contato conosco ou use o Consultor IA para dúvidas rápidas.
                     </p>
                     <div className="flex gap-3">
-                      <Button variant="outline" onClick={() => setActiveTab("consultant")}>
+                      <Button variant="outline" onClick={() => handleTabChange("consultant")}>
                         <Bot className="h-4 w-4 mr-2" />
                         Consultor IA
                       </Button>
