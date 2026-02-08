@@ -225,12 +225,13 @@ ${model.packContents.join(", ")}
               ))}
             </nav>
 
-            {/* Quick Access */}
-            <div className="p-4 border-t border-border mt-4">
+            {/* Quick Access - Compact */}
+            <div className="p-3 border-t border-border mt-4">
               <OnHubLicenseCard
                 productId={model.id}
                 productName={model.name}
                 userId={user?.id}
+                compact
               />
             </div>
           </div>
