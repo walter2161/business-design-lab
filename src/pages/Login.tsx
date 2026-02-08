@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +35,7 @@ const Login = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="font-display text-3xl font-bold text-primary-foreground mb-2">
-            Loja de Negócio
+            Loja de Negócios
           </h1>
           <p className="text-primary-foreground/60">
             Acesse sua conta para ver seus modelos
@@ -53,7 +53,7 @@ const Login = () => {
                 <Input
                   id="username"
                   type="text"
-                  placeholder="admin ou user"
+                  placeholder="Seu nome de usuário"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="pl-10"
@@ -71,7 +71,7 @@ const Login = () => {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10"
@@ -89,20 +89,13 @@ const Login = () => {
             </Button>
           </form>
 
-          <div className="mt-6 p-4 rounded-lg bg-muted/50 border border-border">
-            <p className="text-xs text-muted-foreground text-center mb-2">
-              Credenciais de teste:
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              Não tem uma conta?{" "}
+              <Link to="/cadastro" className="text-primary underline hover:text-primary/80">
+                Cadastre-se
+              </Link>
             </p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="p-2 rounded bg-card border border-border">
-                <p className="font-semibold text-foreground">Admin</p>
-                <p className="text-muted-foreground">admin / 1234</p>
-              </div>
-              <div className="p-2 rounded bg-card border border-border">
-                <p className="font-semibold text-foreground">User</p>
-                <p className="text-muted-foreground">user / 1234</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
