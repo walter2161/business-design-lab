@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Target,
@@ -12,16 +12,52 @@ import {
   Users,
   AlertCircle,
   CheckCircle2,
+  Coins,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Header from "@/components/Header";
 import { models, categoryIcons } from "@/data/models";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const ModelDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user, isAuthenticated, purchaseModel } = useAuth();
   const model = models.find((m) => m.id === id);
+  
+  const hasPurchased = user?.purchasedModels.includes(id || "");
+  const canAfford = (user?.credits || 0) >= (model?.price || 0);
+
+  const handlePurchase = () => {
+    if (!isAuthenticated) {
+      toast.error("Faça login para comprar");
+      navigate("/login");
+      return;
+    }
+    
+    if (!model) return;
+    
+    if (hasPurchased) {
+      navigate(`/meu-modelo/${model.id}`);
+      return;
+    }
+    
+    if (!canAfford) {
+      toast.error("Créditos insuficientes");
+      return;
+    }
+    
+    const success = purchaseModel(model.id, model.price);
+    if (success) {
+      toast.success(`${model.name} adquirido com sucesso!`);
+      navigate(`/meu-modelo/${model.id}`);
+    } else {
+      toast.error("Erro ao processar compra");
+    }
+  };
 
   if (!model) {
     return (
@@ -65,16 +101,39 @@ const ModelDetail = () => {
             </div>
             {/* CTA Card */}
             <div className="w-full shrink-0 rounded-xl border border-primary-foreground/10 bg-primary-foreground/5 p-6 backdrop-blur-sm md:w-72">
-              <div className="mb-1 text-sm text-primary-foreground/50">Pagamento único</div>
+              {isAuthenticated && user && (
+                <div className="mb-3 flex items-center gap-2 text-primary-foreground/60">
+                  <Coins className="h-4 w-4" />
+                  <span className="text-sm">{user.credits} créditos</span>
+                </div>
+              )}
+              <div className="mb-1 text-sm text-primary-foreground/50">
+                {hasPurchased ? "Você já possui" : "Pagamento único"}
+              </div>
               <div className="mb-4 font-display text-4xl font-bold text-amber">
                 R$ {model.price}
               </div>
-              <Button className="w-full gap-2 bg-accent text-accent-foreground hover:bg-accent/90 font-display font-semibold">
-                <ShoppingCart className="h-4 w-4" />
-                Comprar modelo
+              <Button 
+                onClick={handlePurchase}
+                className="w-full gap-2 bg-accent text-accent-foreground hover:bg-accent/90 font-display font-semibold"
+                disabled={isAuthenticated && !canAfford && !hasPurchased}
+              >
+                {hasPurchased ? (
+                  <>
+                    <Package className="h-4 w-4" />
+                    Acessar modelo
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="h-4 w-4" />
+                    {isAuthenticated ? `Comprar (${model.price} créditos)` : "Comprar modelo"}
+                  </>
+                )}
               </Button>
               <p className="mt-3 text-xs text-center text-primary-foreground/40">
-                Acesso imediato após o pagamento
+                {hasPurchased 
+                  ? "Acesse todo o conteúdo exclusivo" 
+                  : "Acesso imediato após o pagamento"}
               </p>
             </div>
           </div>
@@ -239,13 +298,34 @@ const ModelDetail = () => {
           {/* Sticky CTA sidebar */}
           <div className="hidden lg:block">
             <div className="sticky top-24 rounded-xl border border-border bg-card p-6">
-              <div className="mb-1 text-sm text-muted-foreground">Pagamento único</div>
+              {isAuthenticated && user && (
+                <div className="mb-3 flex items-center gap-2 text-muted-foreground">
+                  <Coins className="h-4 w-4" />
+                  <span className="text-sm">{user.credits} créditos disponíveis</span>
+                </div>
+              )}
+              <div className="mb-1 text-sm text-muted-foreground">
+                {hasPurchased ? "Você já possui" : "Pagamento único"}
+              </div>
               <div className="mb-4 font-display text-4xl font-bold text-foreground">
                 R$ {model.price}
               </div>
-              <Button className="w-full gap-2 bg-accent text-accent-foreground hover:bg-accent/90 font-display font-semibold mb-4">
-                <ShoppingCart className="h-4 w-4" />
-                Comprar modelo
+              <Button 
+                onClick={handlePurchase}
+                className="w-full gap-2 bg-accent text-accent-foreground hover:bg-accent/90 font-display font-semibold mb-4"
+                disabled={isAuthenticated && !canAfford && !hasPurchased}
+              >
+                {hasPurchased ? (
+                  <>
+                    <Package className="h-4 w-4" />
+                    Acessar modelo
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="h-4 w-4" />
+                    {isAuthenticated ? `Comprar` : "Comprar modelo"}
+                  </>
+                )}
               </Button>
               <Separator className="my-4" />
               <div className="space-y-3 text-sm">
@@ -275,12 +355,27 @@ const ModelDetail = () => {
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card p-4 lg:hidden">
         <div className="container mx-auto flex items-center justify-between">
           <div>
-            <div className="text-xs text-muted-foreground">Pagamento único</div>
+            <div className="text-xs text-muted-foreground">
+              {hasPurchased ? "Você já possui" : "Pagamento único"}
+            </div>
             <div className="font-display text-2xl font-bold text-foreground">R$ {model.price}</div>
           </div>
-          <Button className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90 font-display font-semibold">
-            <ShoppingCart className="h-4 w-4" />
-            Comprar modelo
+          <Button 
+            onClick={handlePurchase}
+            className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90 font-display font-semibold"
+            disabled={isAuthenticated && !canAfford && !hasPurchased}
+          >
+            {hasPurchased ? (
+              <>
+                <Package className="h-4 w-4" />
+                Acessar
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="h-4 w-4" />
+                Comprar
+              </>
+            )}
           </Button>
         </div>
       </div>
