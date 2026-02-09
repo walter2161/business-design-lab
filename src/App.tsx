@@ -20,7 +20,8 @@ import Admin from "./pages/Admin";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
-import Promocao from "./pages/Promocao";
+import Imoveis from "./pages/Imoveis";
+import Servicos from "./pages/Servicos";
 import Curso from "./pages/Curso";
 
 const queryClient = new QueryClient();
@@ -35,7 +36,8 @@ const App = () => (
           <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/promocao" element={<Promocao />} />
+            <Route path="/imoveis" element={<Imoveis />} />
+            <Route path="/servicos" element={<Servicos />} />
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro" element={<Register />} />
             <Route path="/modelo/:id" element={<ModelDetail />} />
