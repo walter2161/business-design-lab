@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { Search, ArrowRight, Clock, CheckCircle2, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -135,7 +136,7 @@ const Servicos = () => {
 
 const ServicoCard = ({ servico }: { servico: typeof servicos[0] }) => {
   return (
-    <div className="group overflow-hidden rounded-xl border border-border bg-card card-hover">
+    <Link to={`/servicos/${servico.id}`} className="group block overflow-hidden rounded-xl border border-border bg-card card-hover">
       <div className="relative h-40 overflow-hidden">
         <img src={servico.imagem} alt={servico.nome} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -193,7 +194,7 @@ const ServicoCard = ({ servico }: { servico: typeof servicos[0] }) => {
           </Button>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
