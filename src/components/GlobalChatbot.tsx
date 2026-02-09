@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { MessageCircle, X, Send, Loader2, Bot, Minimize2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,10 @@ const GlobalChatbot = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  
+  // Detecta se está em página de produto para ajustar posição no mobile
+  const isProductPage = location.pathname.startsWith("/modelo/");
 
   // Scroll para última mensagem
   useEffect(() => {
@@ -89,7 +94,9 @@ const GlobalChatbot = () => {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-accent text-accent-foreground shadow-lg hover:bg-accent/90 hover:scale-110 transition-all duration-300"
+        className={`fixed right-6 z-50 h-14 w-14 rounded-full bg-accent text-accent-foreground shadow-lg hover:bg-accent/90 hover:scale-110 transition-all duration-300 ${
+          isProductPage ? "bottom-24 md:bottom-6" : "bottom-6"
+        }`}
         size="icon"
       >
         <MessageCircle className="h-6 w-6" />
@@ -99,9 +106,9 @@ const GlobalChatbot = () => {
 
   return (
     <div 
-      className={`fixed bottom-6 right-6 z-50 bg-card border border-border rounded-xl shadow-2xl transition-all duration-300 ${
+      className={`fixed right-6 z-50 bg-card border border-border rounded-xl shadow-2xl transition-all duration-300 ${
         isMinimized ? "w-72 h-14" : "w-80 sm:w-96 h-[500px]"
-      }`}
+      } ${isProductPage ? "bottom-24 md:bottom-6" : "bottom-6"}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between p-3 border-b border-border bg-accent/10 rounded-t-xl">
