@@ -435,7 +435,7 @@ ${model.packContents.join(", ")}
             {/* Course Tab */}
             {activeTab === "course" && (
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-4">
                   <div>
                     <h1 className="font-display text-2xl font-bold text-foreground">
                       Curso de Implementação
@@ -444,6 +444,12 @@ ${model.packContents.join(", ")}
                       Jornada completa do estudo à execução do seu negócio
                     </p>
                   </div>
+                  <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
+                    <Link to={`/curso/${id}`}>
+                      <GraduationCap className="h-4 w-4 mr-2" />
+                      Abrir Curso Completo
+                    </Link>
+                  </Button>
                 </div>
 
                 <CourseSystem modelName={model.name} />

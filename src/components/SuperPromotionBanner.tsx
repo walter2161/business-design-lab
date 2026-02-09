@@ -75,9 +75,12 @@ const SuperPromotionBanner = () => {
             <Button 
               size="sm"
               className="bg-navy text-white hover:bg-navy-light gap-2 text-sm px-6 py-2 shadow-lg hover:shadow-xl transition-all"
+              asChild
             >
-              Aproveitar agora
-              <ArrowRight className="h-4 w-4" />
+              <a href="/promocao">
+                Aproveitar agora
+                <ArrowRight className="h-4 w-4" />
+              </a>
             </Button>
           </div>
 

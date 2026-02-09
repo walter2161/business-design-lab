@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Tag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { BusinessModel } from "@/data/models";
@@ -7,9 +7,14 @@ import { categoryIcons } from "@/data/models";
 
 interface ModelCardProps {
   model: BusinessModel;
+  showPromoPrice?: boolean;
 }
 
-const ModelCard = ({ model }: ModelCardProps) => {
+const PROMO_DISCOUNT = 0.10; // 10% de desconto
+
+const ModelCard = ({ model, showPromoPrice = true }: ModelCardProps) => {
+  const promoPrice = Math.round(model.price * (1 - PROMO_DISCOUNT));
+  
   return (
     <Link to={`/modelo/${model.id}`} className="group block">
       <div className="card-hover overflow-hidden rounded-xl border border-border bg-card">
@@ -22,9 +27,17 @@ const ModelCard = ({ model }: ModelCardProps) => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
           <div className="absolute inset-0 p-4 flex flex-col justify-between">
-            <Badge className="w-fit border-0 bg-accent/90 text-accent-foreground font-medium text-xs">
-              {categoryIcons[model.category]} {model.category}
-            </Badge>
+            <div className="flex items-center justify-between">
+              <Badge className="w-fit border-0 bg-accent/90 text-accent-foreground font-medium text-xs">
+                {categoryIcons[model.category]} {model.category}
+              </Badge>
+              {showPromoPrice && (
+                <Badge className="bg-destructive text-destructive-foreground border-0 text-xs font-bold animate-pulse">
+                  <Tag className="h-3 w-3 mr-1" />
+                  -10%
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
 
@@ -39,10 +52,23 @@ const ModelCard = ({ model }: ModelCardProps) => {
 
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground">A partir de</span>
-              <span className="font-display text-xl font-bold text-foreground">
-                R$ {model.price}
+              <span className="text-xs text-muted-foreground">
+                {showPromoPrice ? "Primeira compra" : "A partir de"}
               </span>
+              {showPromoPrice ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground line-through">
+                    R$ {model.price}
+                  </span>
+                  <span className="font-display text-xl font-bold text-accent">
+                    R$ {promoPrice}
+                  </span>
+                </div>
+              ) : (
+                <span className="font-display text-xl font-bold text-foreground">
+                  R$ {model.price}
+                </span>
+              )}
             </div>
             <Button
               variant="ghost"
