@@ -23,6 +23,7 @@ import {
   BookOpen,
   Video,
   FileSpreadsheet,
+  Rocket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +76,7 @@ import {
   type Promotion,
 } from "@/data/promotions";
 import { toast } from "sonner";
+import AdminMasterPanel from "@/components/AdminMasterPanel";
 
 const Admin = () => {
   const { user, isAuthenticated } = useAuth();
@@ -223,8 +225,12 @@ const Admin = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+        <Tabs defaultValue="master" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
+            <TabsTrigger value="master" className="gap-2">
+              <Rocket className="h-4 w-4" />
+              <span className="hidden sm:inline">Master</span>
+            </TabsTrigger>
             <TabsTrigger value="products" className="gap-2">
               <Package className="h-4 w-4" />
               <span className="hidden sm:inline">Produtos</span>
@@ -246,6 +252,11 @@ const Admin = () => {
               <span className="hidden sm:inline">SEO</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* Master Tab */}
+          <TabsContent value="master">
+            <AdminMasterPanel />
+          </TabsContent>
 
           {/* Products Tab */}
           <TabsContent value="products" className="space-y-4">
