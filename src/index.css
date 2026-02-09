@@ -94,6 +94,7 @@
 
   html {
     font-size: 18px; /* Base aumentada de 16px para 18px */
+    overscroll-behavior-y: none;
   }
 
   @media (max-width: 640px) {
@@ -106,6 +107,7 @@
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', system-ui, sans-serif;
     line-height: 1.6;
+    overscroll-behavior-y: none;
   }
 
   h1, h2, h3, h4, h5, h6 {
