@@ -80,7 +80,7 @@ const ModelDetail = () => {
   const handlePurchase = () => {
     if (!isAuthenticated) {
       toast.error("Faça login para comprar");
-      navigate("/login");
+      navigate("/login", { state: { from: `/modelo/${id}` } });
       return;
     }
     
