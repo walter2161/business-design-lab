@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Tag } from "lucide-react";
+import { ArrowRight, Tag, Award, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { BusinessModel } from "@/data/models";
@@ -14,6 +14,7 @@ const PROMO_DISCOUNT = 0.10; // 10% de desconto
 
 const ModelCard = ({ model, showPromoPrice = true }: ModelCardProps) => {
   const promoPrice = Math.round(model.price * (1 - PROMO_DISCOUNT));
+  const isValidated = model.modelType === "Validado";
   
   return (
     <Link to={`/modelo/${model.id}`} className="group block">
@@ -35,6 +36,25 @@ const ModelCard = ({ model, showPromoPrice = true }: ModelCardProps) => {
                 <Badge className="bg-destructive text-destructive-foreground border-0 text-xs font-bold animate-pulse">
                   <Tag className="h-3 w-3 mr-1" />
                   -10%
+                </Badge>
+              )}
+            </div>
+            {/* Model Type Badges */}
+            <div className="flex items-center gap-2">
+              <Badge className={`border-0 text-xs font-bold ${
+                isValidated 
+                  ? "bg-accent text-accent-foreground" 
+                  : "bg-muted text-muted-foreground"
+              }`}>
+                {isValidated ? (
+                  <><Award className="h-3 w-3 mr-1" /> Validado</>
+                ) : (
+                  <><BookOpen className="h-3 w-3 mr-1" /> Teórico</>
+                )}
+              </Badge>
+              {isValidated && (
+                <Badge className="border-0 bg-muted text-muted-foreground text-xs font-bold">
+                  <BookOpen className="h-3 w-3 mr-1" /> Teórico
                 </Badge>
               )}
             </div>
