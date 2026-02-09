@@ -23,12 +23,16 @@ import {
   HelpCircle,
   HardDrive,
   GraduationCap,
+  Award,
+  Video,
+  FileSpreadsheet,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ValidatorSection from "@/components/ValidatorSection";
 import { models, categoryIcons } from "@/data/models";
 import { useAuth } from "@/contexts/AuthContext";
 import { RelatedArticles } from "@/components/BlogComponents";
@@ -37,6 +41,7 @@ import ProductDrive from "@/components/ProductDrive";
 import CourseSystem from "@/components/CourseModule";
 import { sendMistralMessage, getProductAgentPrompt, ChatMessage } from "@/lib/mistralAI";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const MAX_CHAT_MESSAGES = 20;
 
@@ -390,6 +395,61 @@ ${model.packContents.join(", ")}
                     ))}
                   </div>
                 </Section>
+
+                {/* Validator Section - for validated models */}
+                {model.modelType === "Validado" && model.validator && (
+                  <ValidatorSection validator={model.validator} />
+                )}
+
+                {/* Extra Contents - for validated models */}
+                {model.modelType === "Validado" && model.extraContents && model.extraContents.length > 0 && (
+                  <Section icon={<FileSpreadsheet className="h-5 w-5" />} title="Conteúdos Extras (Exclusivo Validado)">
+                    <div className="rounded-xl border border-accent/30 bg-accent/5 p-6">
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Seu modelo validado inclui <strong>{model.extraContents.length} conteúdos extras</strong>:
+                      </p>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {model.extraContents.map((content, i) => (
+                          <div key={i} className="flex items-center gap-2 text-sm">
+                            <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
+                            <span className="text-foreground">{content}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </Section>
+                )}
+
+                {/* Consultancy Upsell - for validated models */}
+                {model.modelType === "Validado" && model.consultancyPrice && model.validator && (
+                  <Section icon={<Video className="h-5 w-5" />} title="Consultoria Individual">
+                    <div className="rounded-xl border-2 border-accent bg-accent/5 p-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                          <h3 className="font-display font-bold text-foreground text-lg">
+                            1 hora com {model.validator.name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Sessão individual de consultoria com o especialista que validou este modelo.
+                          </p>
+                        </div>
+                        <div className="text-center sm:text-right shrink-0">
+                          <span className="font-display text-3xl font-bold text-accent">
+                            R$ {model.consultancyPrice}
+                          </span>
+                          <p className="text-xs text-muted-foreground">por sessão</p>
+                          <Button
+                            size="sm"
+                            className="mt-2 bg-accent text-accent-foreground hover:bg-accent/90"
+                            onClick={() => toast.info("Em breve! Entraremos em contato para agendar.")}
+                          >
+                            Agendar Consultoria
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </Section>
+                )}
 
                 {/* Mobile Drive Card */}
                 <div className="lg:hidden">

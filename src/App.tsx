@@ -21,7 +21,9 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 import Imoveis from "./pages/Imoveis";
+import ImovelDetail from "./pages/ImovelDetail";
 import Servicos from "./pages/Servicos";
+import ServicoDetail from "./pages/ServicoDetail";
 import Curso from "./pages/Curso";
 
 const queryClient = new QueryClient();
@@ -37,7 +39,9 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/imoveis" element={<Imoveis />} />
+            <Route path="/imoveis/:id" element={<ImovelDetail />} />
             <Route path="/servicos" element={<Servicos />} />
+            <Route path="/servicos/:id" element={<ServicoDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro" element={<Register />} />
             <Route path="/modelo/:id" element={<ModelDetail />} />

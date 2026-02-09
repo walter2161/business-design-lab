@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { Search, MapPin, Home, Building2, DoorOpen, ArrowRight, Ruler, Car, Bath, BedDouble, Tag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -185,7 +186,7 @@ const ImovelCard = ({ imovel }: { imovel: typeof imoveis[0] }) => {
   };
 
   return (
-    <div className="group overflow-hidden rounded-xl border border-border bg-card card-hover">
+    <Link to={`/imoveis/${imovel.id}`} className="group block overflow-hidden rounded-xl border border-border bg-card card-hover">
       <div className="relative h-48 overflow-hidden">
         <img src={imovel.imagem} alt={imovel.titulo} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -243,7 +244,7 @@ const ImovelCard = ({ imovel }: { imovel: typeof imoveis[0] }) => {
           </Button>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
