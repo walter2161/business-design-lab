@@ -292,19 +292,31 @@ const CourseSystem = ({ modelName }: CourseSystemProps) => {
           </DialogHeader>
 
           <div className="flex-1 mt-4 space-y-6">
-            {/* Player placeholder */}
-            <div className="aspect-video bg-gradient-to-br from-muted to-muted/50 rounded-xl flex items-center justify-center border border-border">
-              <div className="text-center">
-                <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
-                  <Play className="h-8 w-8 text-primary ml-1" />
+            {/* Video Player */}
+            <div className="aspect-video rounded-xl overflow-hidden border border-border bg-black">
+              {selectedLesson?.youtubeId ? (
+                <iframe
+                  src={`https://www.youtube.com/embed/${selectedLesson.youtubeId}?autoplay=0&rel=0`}
+                  title={selectedLesson.title}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+                  <div className="text-center">
+                    <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
+                      <Play className="h-8 w-8 text-primary ml-1" />
+                    </div>
+                    <p className="text-muted-foreground">
+                      Vídeo em breve disponível
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Duração: {selectedLesson?.duration}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-muted-foreground">
-                  Vídeo aula em breve disponível
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Duração: {selectedLesson?.duration}
-                </p>
-              </div>
+              )}
             </div>
 
             {/* Descrição */}
