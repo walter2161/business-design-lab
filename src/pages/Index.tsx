@@ -8,6 +8,7 @@ import CategoryFilter from "@/components/CategoryFilter";
 import ModelCard from "@/components/ModelCard";
 import Footer from "@/components/Footer";
 import SuperPromotionBanner from "@/components/SuperPromotionBanner";
+import PremiumScaleSection from "@/components/PremiumScaleSection";
 import { PromotionBanner, ActiveCoupons } from "@/components/PromotionComponents";
 import { BlogSection } from "@/components/BlogComponents";
 import { models, type Category } from "@/data/models";
@@ -19,8 +20,9 @@ const Index = () => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
-  const filtered = useMemo(() => {
-    return models.filter((m) => {
+  // Separate regular products from Escala products
+  const { regularProducts, escalaProducts } = useMemo(() => {
+    const filtered = models.filter((m) => {
       const matchesCategory = !selectedCategory || m.category === selectedCategory;
       const matchesSearch =
         !search ||
@@ -28,6 +30,11 @@ const Index = () => {
         m.shortDescription.toLowerCase().includes(search.toLowerCase());
       return matchesCategory && matchesSearch;
     });
+
+    return {
+      regularProducts: filtered.filter(m => m.category !== "Escala"),
+      escalaProducts: filtered.filter(m => m.category === "Escala"),
+    };
   }, [search, selectedCategory]);
 
   const {
@@ -37,7 +44,7 @@ const Index = () => {
     loadMoreRef,
     displayedCount,
     totalItems,
-  } = useInfiniteScroll({ items: filtered, itemsPerPage: ITEMS_PER_PAGE });
+  } = useInfiniteScroll({ items: regularProducts, itemsPerPage: ITEMS_PER_PAGE });
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -58,7 +65,7 @@ const Index = () => {
           <div>
             <CategoryFilter selected={selectedCategory} onSelect={setSelectedCategory} />
             <p className="text-sm text-muted-foreground mt-2">
-              Mostrando {displayedCount} de {totalItems} produtos
+              Mostrando {displayedCount + escalaProducts.length} de {totalItems + escalaProducts.length} produtos
             </p>
           </div>
           <div className="relative w-full md:w-72">
@@ -72,7 +79,7 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Grid - first batch */}
+        {/* Grid - first batch of regular products */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {displayedItems.slice(0, 3).map((model) => (
             <ModelCard key={model.id} model={model} showPromoPrice />
@@ -82,13 +89,18 @@ const Index = () => {
         {/* Super Promotion */}
         {displayedItems.length > 0 && <SuperPromotionBanner />}
 
-        {/* Grid - rest */}
+        {/* Grid - rest of regular products */}
         {displayedItems.length > 3 && (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {displayedItems.slice(3).map((model) => (
               <ModelCard key={model.id} model={model} showPromoPrice />
             ))}
           </div>
+        )}
+
+        {/* Premium Escala Section */}
+        {escalaProducts.length > 0 && (
+          <PremiumScaleSection products={escalaProducts} showPromoPrice />
         )}
 
         {/* Loading indicator */}
@@ -122,7 +134,7 @@ const Index = () => {
           </div>
         )}
 
-        {filtered.length === 0 && (
+        {regularProducts.length === 0 && escalaProducts.length === 0 && (
           <div className="py-20 text-center">
             <p className="text-lg text-muted-foreground">Nenhum modelo encontrado.</p>
           </div>
