@@ -52,11 +52,6 @@ const ModelCard = ({ model, showPromoPrice = true }: ModelCardProps) => {
                   <><BookOpen className="h-3 w-3 mr-1" /> Teórico</>
                 )}
               </Badge>
-              {isValidated && (
-                <Badge className="border-0 bg-muted text-muted-foreground text-xs font-bold">
-                  <BookOpen className="h-3 w-3 mr-1" /> Teórico
-                </Badge>
-              )}
             </div>
           </div>
         </div>

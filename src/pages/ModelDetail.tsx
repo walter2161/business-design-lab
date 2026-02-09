@@ -144,11 +144,6 @@ const ModelDetail = () => {
               }`}>
                 {isValidated ? <><Award className="h-3 w-3 mr-1" /> Validado</> : <><BookOpen className="h-3 w-3 mr-1" /> Teórico</>}
               </Badge>
-              {isValidated && (
-                <Badge className="border-0 bg-muted text-muted-foreground text-xs font-bold">
-                  <BookOpen className="h-3 w-3 mr-1" /> Teórico
-                </Badge>
-              )}
             </div>
             <h1 className="font-display text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
               {model.name}
