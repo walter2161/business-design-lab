@@ -58,13 +58,19 @@ const ModelDetail = () => {
   const isValidated = model?.modelType === "Validado";
 
   const handleApplyCoupon = (code?: string) => {
-    const codeToApply = code || couponCode;
-    if (!codeToApply.trim() || !model) return;
+    const codeToApply = (code || couponCode).toUpperCase().trim();
+    if (!codeToApply || !model) return;
     
-    const result = applyCoupon(model.price, codeToApply);
+    // Check if this coupon is already applied
+    if (appliedCoupon && couponCode.toUpperCase() === codeToApply) {
+      toast.warning("Este cupom já foi aplicado nesta compra!");
+      return;
+    }
+    
+    const result = applyCoupon(model.price, codeToApply, model.category);
     if (result.valid) {
       setAppliedCoupon({ discount: result.discount, finalPrice: result.finalPrice });
-      setCouponCode(codeToApply.toUpperCase());
+      setCouponCode(codeToApply);
       toast.success(result.message);
     } else {
       toast.error(result.message);
@@ -187,20 +193,29 @@ const ModelDetail = () => {
             <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
               {/* Coupon input */}
               {!hasPurchased && (
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Cupom de desconto"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                    className="w-40"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleApplyCoupon()}
-                  >
-                    <Tag className="h-4 w-4" />
-                  </Button>
+                <div className="flex flex-col gap-1">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Cole seu cupom aqui..."
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
+                      className={`w-44 text-xs ${appliedCoupon ? "border-accent bg-accent/5" : ""}`}
+                    />
+                    <Button
+                      variant={appliedCoupon ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => appliedCoupon ? (setAppliedCoupon(null), setCouponCode(""), toast.info("Cupom removido")) : handleApplyCoupon()}
+                      className={appliedCoupon ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" : ""}
+                    >
+                      {appliedCoupon ? "✕" : <Tag className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  {appliedCoupon && (
+                    <span className="text-xs text-accent font-medium flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" /> Cupom {couponCode} aplicado! -R${appliedCoupon.discount}
+                    </span>
+                  )}
                 </div>
               )}
               
