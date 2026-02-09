@@ -22,7 +22,6 @@ const regiaoFilters: { label: string; value: Regiao | null }[] = [
 
 const espacoFilters: { label: string; value: TipoEspaco | null }[] = [
   { label: "Todos", value: null },
-  { label: "Residencial", value: "Residencial" },
   { label: "Comercial", value: "Comercial" },
   { label: "Sala Comercial", value: "Sala Comercial" },
 ];
