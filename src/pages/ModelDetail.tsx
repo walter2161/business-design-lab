@@ -15,6 +15,10 @@ import {
   CheckCircle2,
   Coins,
   Tag,
+  Award,
+  BookOpen,
+  Video,
+  FileSpreadsheet,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,7 +26,10 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ValidatorSection from "@/components/ValidatorSection";
+import TaxonomySelector from "@/components/TaxonomySelector";
 import { models, categoryIcons } from "@/data/models";
+import type { InvestmentLevel, TargetAudienceOption } from "@/data/models";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { CouponCard, CouponTimer } from "@/components/PromotionComponents";
@@ -39,6 +46,8 @@ const ModelDetail = () => {
   
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ discount: number; finalPrice: number } | null>(null);
+  const [selectedInvestment, setSelectedInvestment] = useState<string>("");
+  const [selectedAudience, setSelectedAudience] = useState<string>("");
   
   const hasPurchased = user?.purchasedModels.includes(id || "");
   const basePrice = model?.price || 0;
@@ -46,6 +55,7 @@ const ModelDetail = () => {
   const canAfford = (user?.credits || 0) >= finalPrice;
   
   const applicableCoupons = model ? getApplicableCoupons(model.id, model.category) : [];
+  const isValidated = model?.modelType === "Validado";
 
   const handleApplyCoupon = (code?: string) => {
     const codeToApply = code || couponCode;
@@ -125,9 +135,21 @@ const ModelDetail = () => {
               <ArrowLeft className="h-4 w-4" />
               Voltar ao catálogo
             </Link>
-            <Badge className="mb-3 border-0 bg-accent/20 text-amber font-medium">
-              {categoryIcons[model.category]} {model.category}
-            </Badge>
+            <div className="flex items-center gap-2 mb-3">
+              <Badge className="border-0 bg-accent/20 text-amber font-medium">
+                {categoryIcons[model.category]} {model.category}
+              </Badge>
+              <Badge className={`border-0 text-xs font-bold ${
+                isValidated ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"
+              }`}>
+                {isValidated ? <><Award className="h-3 w-3 mr-1" /> Validado</> : <><BookOpen className="h-3 w-3 mr-1" /> Teórico</>}
+              </Badge>
+              {isValidated && (
+                <Badge className="border-0 bg-muted text-muted-foreground text-xs font-bold">
+                  <BookOpen className="h-3 w-3 mr-1" /> Teórico
+                </Badge>
+              )}
+            </div>
             <h1 className="font-display text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
               {model.name}
             </h1>
@@ -329,6 +351,84 @@ const ModelDetail = () => {
               </div>
             </Section>
 
+            {/* Validator Section - only for Validated models */}
+            {isValidated && model.validator && (
+              <ValidatorSection validator={model.validator} />
+            )}
+
+            {/* Extra Contents - only for Validated models */}
+            {isValidated && model.extraContents && model.extraContents.length > 0 && (
+              <Section icon={<FileSpreadsheet className="h-5 w-5" />} title="Conteúdos Extras (Exclusivo Validado)">
+                <div className="rounded-xl border border-accent/30 bg-accent/5 p-6">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Este modelo validado inclui <strong>{model.extraContents.length} conteúdos extras</strong> além do pack padrão:
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {model.extraContents.map((content, i) => (
+                      <div key={i} className="flex items-center gap-2 text-sm">
+                        <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
+                        <span className="text-foreground">{content}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Section>
+            )}
+
+            {/* Consultancy Upsell - only for Validated models */}
+            {isValidated && model.consultancyPrice && (
+              <Section icon={<Video className="h-5 w-5" />} title="Consultoria Individual">
+                <div className="rounded-xl border-2 border-accent bg-accent/5 p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                      <h3 className="font-display font-bold text-foreground text-lg">
+                        1 hora com {model.validator?.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Sessão individual de consultoria com o especialista que validou este modelo. 
+                        Tire dúvidas, receba orientações personalizadas e acelere seus resultados.
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2 italic">
+                        * Disponível exclusivamente para quem adquiriu o modelo validado.
+                      </p>
+                    </div>
+                    <div className="text-center sm:text-right shrink-0">
+                      <span className="font-display text-3xl font-bold text-accent">
+                        R$ {model.consultancyPrice}
+                      </span>
+                      <p className="text-xs text-muted-foreground">por sessão</p>
+                      {hasPurchased && (
+                        <Button
+                          size="sm"
+                          className="mt-2 bg-accent text-accent-foreground hover:bg-accent/90"
+                          onClick={() => toast.info("Em breve! Entraremos em contato para agendar.")}
+                        >
+                          Agendar Consultoria
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Section>
+            )}
+
+            {/* Taxonomy Selector */}
+            {model.investmentLevels && model.targetAudienceOptions && (
+              <Section icon={<Target className="h-5 w-5" />} title="Personalize seu Modelo">
+                <p className="text-sm text-muted-foreground mb-4">
+                  Selecione seu perfil para receber um modelo personalizado ao seu investimento e público-alvo.
+                </p>
+                <TaxonomySelector
+                  investmentLevels={model.investmentLevels}
+                  targetAudienceOptions={model.targetAudienceOptions}
+                  selectedInvestment={selectedInvestment}
+                  selectedAudience={selectedAudience}
+                  onInvestmentChange={setSelectedInvestment}
+                  onAudienceChange={setSelectedAudience}
+                />
+              </Section>
+            )}
+
             {/* Pack */}
             <Section icon={<Package className="h-5 w-5" />} title="O que vem no Pack">
               <PackPreview maxItems={10} />
@@ -419,6 +519,22 @@ const ModelDetail = () => {
                     <CheckCircle2 className="h-4 w-4 text-accent" />
                     {standardPackItems.length} arquivos inclusos
                   </div>
+                  {isValidated && (
+                    <>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Award className="h-4 w-4 text-accent" />
+                        Validado por especialista
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <FileSpreadsheet className="h-4 w-4 text-accent" />
+                        +{model.extraContents?.length || 10} conteúdos extras
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Video className="h-4 w-4 text-accent" />
+                        Consultoria disponível (R$ {model.consultancyPrice})
+                      </div>
+                    </>
+                  )}
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <CheckCircle2 className="h-4 w-4 text-accent" />
                     IA especialista inclusa

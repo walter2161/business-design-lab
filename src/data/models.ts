@@ -11,12 +11,32 @@ export type Category =
   | "Serviços Operacionais"
   | "Escala";
 
+export type ModelType = "Teórico" | "Validado";
+
+export type InvestmentLevel = "R$ 5.000" | "R$ 20.000" | "R$ 50.000";
+export type TargetAudienceOption = "A e B" | "B e C" | "C e D";
+
+export interface ValidatorProfile {
+  name: string;
+  photo: string;
+  area: string;
+  story: string;
+  metrics: { label: string; value: string }[];
+  examples: string[];
+}
+
+export interface InvestmentConfig {
+  level: InvestmentLevel;
+  description: string;
+}
+
 export interface BusinessModel {
   id: string;
   name: string;
   shortDescription: string;
   price: number;
   category: Category;
+  modelType: ModelType;
   image: string;
   targetAudience: string;
   notFor: string;
@@ -41,6 +61,13 @@ export interface BusinessModel {
   }[];
   packContents: string[];
   aiAgentDescription: string;
+  // Validated model fields
+  validator?: ValidatorProfile;
+  extraContents?: string[];
+  consultancyPrice?: number;
+  // Taxonomy - investment levels specific to this model
+  investmentLevels?: InvestmentConfig[];
+  targetAudienceOptions?: TargetAudienceOption[];
 }
 
 // Pack padrão de 30 itens para todos os modelos
@@ -70,7 +97,7 @@ export const categoryIcons: Record<Category, string> = {
   "Escala": "🚀",
 };
 
-export const models: BusinessModel[] = [
+export const models = [
   // ==================== SERVIÇOS PESSOAIS E PROFISSIONAIS ====================
   {
     id: "salao-beleza",
@@ -2248,9 +2275,181 @@ export const models: BusinessModel[] = [
     packContents: standardPackContents,
     aiAgentDescription: "IA especialista em startups. Ajuda com captação, valuation, governança e estratégia de exit.",
   },
-];
+] as unknown as BusinessModel[];
 
-// Aplica o pack padrão de 30 itens a todos os modelos
+// Default investment levels per price range
+const getDefaultInvestmentLevels = (price: number): InvestmentConfig[] => {
+  if (price <= 110) {
+    return [
+      { level: "R$ 5.000", description: "Investimento mínimo para começar enxuto" },
+      { level: "R$ 20.000", description: "Investimento médio com estrutura sólida" },
+      { level: "R$ 50.000", description: "Investimento completo com máxima estrutura" },
+    ];
+  }
+  if (price <= 200) {
+    return [
+      { level: "R$ 5.000", description: "Início com capital reduzido" },
+      { level: "R$ 20.000", description: "Estrutura intermediária profissional" },
+      { level: "R$ 50.000", description: "Operação completa e robusta" },
+    ];
+  }
+  return [
+    { level: "R$ 20.000", description: "Capital inicial para operação enxuta" },
+    { level: "R$ 50.000", description: "Investimento médio com boa estrutura" },
+    { level: "R$ 50.000", description: "Capital completo para máxima escala" },
+  ];
+};
+
+// Aplica defaults a todos os modelos
 models.forEach(model => {
   model.packContents = standardPackContents;
+  if (!model.modelType) model.modelType = "Teórico";
+  if (!model.investmentLevels) model.investmentLevels = getDefaultInvestmentLevels(model.price);
+  if (!model.targetAudienceOptions) model.targetAudienceOptions = ["A e B", "B e C", "C e D"];
+});
+
+// ==================== MODELOS VALIDADOS ====================
+const validatedModels: Record<string, { validator: ValidatorProfile; extraContents: string[] }> = {
+  "salao-beleza": {
+    validator: {
+      name: "Ana Paula Ferreira",
+      photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=face",
+      area: "Gestão de Salões de Beleza",
+      story: "Ana Paula começou como cabeleireira aos 18 anos em um pequeno salão alugado. Em 8 anos, construiu uma rede de 3 salões premium em São Paulo, faturando mais de R$ 150 mil/mês.",
+      metrics: [
+        { label: "Anos no mercado", value: "12" },
+        { label: "Unidades", value: "3" },
+        { label: "Faturamento/mês", value: "R$ 150k" },
+        { label: "Clientes ativos", value: "800+" },
+      ],
+      examples: [
+        "Implementou sistema de agendamento online que reduziu no-show em 40%",
+        "Criou programa de fidelidade que aumentou ticket médio em 25%",
+        "Estruturou modelo de comissão que reduziu turnover de funcionários em 60%",
+      ],
+    },
+    extraContents: [
+      "Planilha de comissões otimizada", "Script de upsell para recepcionistas",
+      "Checklist de inauguração validado", "Modelo de programa de fidelidade",
+      "Estudo de caso: de 1 para 3 unidades", "Planilha de controle de estoque avançada",
+      "Template de avaliação de funcionários", "Guia de precificação por região",
+      "Script de reativação de clientes inativos", "Modelo de contrato de parceria com marcas",
+    ],
+  },
+  "barbearia": {
+    validator: {
+      name: "Ricardo Mendes",
+      photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
+      area: "Barbearias Premium e Franquias",
+      story: "Ricardo transformou uma barbearia de bairro em uma marca com 5 unidades e modelo de franquia. Pioneiro em planos de assinatura no segmento, com mais de 300 assinantes ativos.",
+      metrics: [
+        { label: "Unidades", value: "5" },
+        { label: "Assinantes", value: "300+" },
+        { label: "Faturamento/mês", value: "R$ 200k" },
+        { label: "Anos de mercado", value: "9" },
+      ],
+      examples: [
+        "Criou modelo de assinatura que gera 60% da receita recorrente",
+        "Desenvolveu linha própria de produtos que representa 15% do faturamento",
+        "Estruturou modelo de franquia com investimento a partir de R$ 80 mil",
+      ],
+    },
+    extraContents: [
+      "Modelo de plano de assinatura detalhado", "Planilha de viabilidade de franquia",
+      "Script de vendas para planos", "Guia de criação de produtos próprios",
+      "Estudo de caso: modelo de franquia", "Template de treinamento de barbeiros",
+      "Checklist de padronização de unidades", "Planilha de royalties e taxas",
+      "Modelo de contrato de franquia", "Guia de experiência do cliente premium",
+    ],
+  },
+  "clinica-estetica": {
+    validator: {
+      name: "Dra. Camila Rodrigues",
+      photo: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200&h=200&fit=crop&crop=face",
+      area: "Estética Avançada e Gestão de Clínicas",
+      story: "Biomédica esteta com MBA em gestão de saúde, Dra. Camila montou sua primeira clínica aos 26 anos. Hoje gerencia 2 clínicas com foco em procedimentos de alta complexidade e ticket alto.",
+      metrics: [
+        { label: "Clínicas", value: "2" },
+        { label: "Pacientes/mês", value: "250" },
+        { label: "Ticket médio", value: "R$ 600" },
+        { label: "Faturamento/mês", value: "R$ 180k" },
+      ],
+      examples: [
+        "Implementou protocolos combinados que aumentaram ticket médio em 70%",
+        "Criou programa de acompanhamento que triplicou a taxa de retorno",
+        "Estruturou modelo de sociedade com especialistas que reduz custos fixos",
+      ],
+    },
+    extraContents: [
+      "Protocolos combinados de alta performance", "Planilha de ROI por procedimento",
+      "Script de vendas para protocolos premium", "Modelo de contrato de sociedade médica",
+      "Estudo de caso: de 1 para 2 clínicas", "Template de ficha de avaliação avançada",
+      "Guia de precificação por procedimento", "Checklist de compliance sanitário",
+      "Planilha de gestão de insumos", "Modelo de programa de indicação médica",
+    ],
+  },
+  "restaurante": {
+    validator: {
+      name: "Chef Marcos Oliveira",
+      photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop&crop=face",
+      area: "Gastronomia e Gestão de Restaurantes",
+      story: "Chef formado pelo Senac com passagem por restaurantes estrelados na Europa. Abriu seu primeiro restaurante em 2016 e hoje opera 2 casas com faturamento combinado de R$ 300 mil/mês.",
+      metrics: [
+        { label: "Restaurantes", value: "2" },
+        { label: "Covers/mês", value: "4.000" },
+        { label: "Nota Google", value: "4.8" },
+        { label: "Faturamento/mês", value: "R$ 300k" },
+      ],
+      examples: [
+        "Reduziu food cost de 38% para 28% com engenharia de cardápio",
+        "Implementou delivery que representa 30% do faturamento sem afetar operação",
+        "Criou programa de eventos privados que gera R$ 50 mil extras/mês",
+      ],
+    },
+    extraContents: [
+      "Planilha de engenharia de cardápio", "Modelo de ficha técnica de receitas",
+      "Script de treinamento de equipe de salão", "Guia de food cost otimizado",
+      "Estudo de caso: delivery rentável", "Template de controle de CMV diário",
+      "Checklist de abertura e fechamento", "Modelo de avaliação de fornecedores",
+      "Planilha de escala de funcionários", "Guia de eventos e catering",
+    ],
+  },
+  "ecommerce": {
+    validator: {
+      name: "Felipe Santos",
+      photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face",
+      area: "E-commerce e Marketplace",
+      story: "Felipe começou vendendo no Mercado Livre e em 5 anos construiu um e-commerce próprio que fatura R$ 500 mil/mês. Especialista em tráfego pago e conversão.",
+      metrics: [
+        { label: "Faturamento/mês", value: "R$ 500k" },
+        { label: "Pedidos/mês", value: "3.000" },
+        { label: "ROAS médio", value: "5.2x" },
+        { label: "Anos no mercado", value: "7" },
+      ],
+      examples: [
+        "Otimizou funil de vendas aumentando conversão de 1.2% para 3.8%",
+        "Estruturou operação logística própria reduzindo prazo de entrega em 50%",
+        "Implementou estratégia de remarketing que recupera 15% dos carrinhos abandonados",
+      ],
+    },
+    extraContents: [
+      "Planilha de gestão de tráfego pago", "Script de atendimento pós-venda",
+      "Template de e-mail marketing automatizado", "Guia de otimização de conversão",
+      "Estudo de caso: de marketplace para loja própria", "Planilha de precificação com margem real",
+      "Checklist de logística eficiente", "Modelo de programa de afiliados",
+      "Template de descrição de produtos que convertem", "Guia de SEO para e-commerce",
+    ],
+  },
+};
+
+// Aplica dados de validação aos modelos validados
+Object.entries(validatedModels).forEach(([modelId, data]) => {
+  const model = models.find(m => m.id === modelId);
+  if (model) {
+    model.modelType = "Validado";
+    model.price = model.price + 150;
+    model.validator = data.validator;
+    model.extraContents = data.extraContents;
+    model.consultancyPrice = 99;
+  }
 });

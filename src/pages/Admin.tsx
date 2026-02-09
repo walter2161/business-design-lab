@@ -19,6 +19,10 @@ import {
   Trash2,
   ToggleLeft,
   ToggleRight,
+  Award,
+  BookOpen,
+  Video,
+  FileSpreadsheet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,7 +58,7 @@ import {
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
-import { models, categoryIcons, categories, type BusinessModel, type Category } from "@/data/models";
+import { models, categoryIcons, categories, type BusinessModel, type Category, type ModelType } from "@/data/models";
 import { 
   getCoupons, 
   getPromotions, 
@@ -220,10 +224,14 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
             <TabsTrigger value="products" className="gap-2">
               <Package className="h-4 w-4" />
               <span className="hidden sm:inline">Produtos</span>
+            </TabsTrigger>
+            <TabsTrigger value="categories" className="gap-2">
+              <Award className="h-4 w-4" />
+              <span className="hidden sm:inline">Categorias</span>
             </TabsTrigger>
             <TabsTrigger value="promotions" className="gap-2">
               <Tag className="h-4 w-4" />
@@ -266,6 +274,7 @@ const Admin = () => {
                       <TableRow>
                         <TableHead className="w-[80px]">Capa</TableHead>
                         <TableHead>Nome</TableHead>
+                        <TableHead>Tipo</TableHead>
                         <TableHead>Categoria</TableHead>
                         <TableHead className="text-right">Preço</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
@@ -282,6 +291,11 @@ const Admin = () => {
                             />
                           </TableCell>
                           <TableCell className="font-medium">{product.name}</TableCell>
+                          <TableCell>
+                            <Badge variant={product.modelType === "Validado" ? "default" : "secondary"} className={product.modelType === "Validado" ? "bg-accent text-accent-foreground" : ""}>
+                              {product.modelType === "Validado" ? <><Award className="h-3 w-3 mr-1" /> Validado</> : <><BookOpen className="h-3 w-3 mr-1" /> Teórico</>}
+                            </Badge>
+                          </TableCell>
                           <TableCell>
                             <Badge variant="secondary">
                               {categoryIcons[product.category]} {product.category}
@@ -313,7 +327,143 @@ const Admin = () => {
             </Card>
           </TabsContent>
 
-          {/* Promotions Tab */}
+          {/* Categories & Validation Tab */}
+          <TabsContent value="categories" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" />
+                  Gestão de Categorias e Validação
+                </CardTitle>
+                <CardDescription>
+                  Gerencie tipos de produto (Teórico/Validado), perfis de validadores, taxonomias de investimento e público-alvo.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Summary */}
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="rounded-lg border border-border bg-card p-4 text-center">
+                      <p className="text-2xl font-bold text-foreground">{models.filter(m => m.modelType === "Teórico").length}</p>
+                      <p className="text-sm text-muted-foreground flex items-center justify-center gap-1"><BookOpen className="h-4 w-4" /> Modelos Teóricos</p>
+                    </div>
+                    <div className="rounded-lg border border-accent/30 bg-accent/5 p-4 text-center">
+                      <p className="text-2xl font-bold text-accent">{models.filter(m => m.modelType === "Validado").length}</p>
+                      <p className="text-sm text-muted-foreground flex items-center justify-center gap-1"><Award className="h-4 w-4" /> Modelos Validados</p>
+                    </div>
+                    <div className="rounded-lg border border-border bg-card p-4 text-center">
+                      <p className="text-2xl font-bold text-foreground">+R$ 150</p>
+                      <p className="text-sm text-muted-foreground">Valor adicional Validado</p>
+                    </div>
+                  </div>
+
+                  {/* Validated Models List */}
+                  <div>
+                    <h3 className="font-display font-bold text-foreground mb-3">Modelos Validados</h3>
+                    <div className="rounded-md border">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Modelo</TableHead>
+                            <TableHead>Validador</TableHead>
+                            <TableHead>Área</TableHead>
+                            <TableHead>Extras</TableHead>
+                            <TableHead>Consultoria</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {models.filter(m => m.modelType === "Validado").map(product => (
+                            <TableRow key={product.id}>
+                              <TableCell className="font-medium">{product.name}</TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  {product.validator && (
+                                    <>
+                                      <img src={product.validator.photo} alt={product.validator.name} className="h-8 w-8 rounded-full object-cover" />
+                                      <span className="text-sm">{product.validator.name}</span>
+                                    </>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground">{product.validator?.area}</TableCell>
+                              <TableCell>
+                                <Badge variant="secondary">{product.extraContents?.length || 0} itens</Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge className="bg-accent/20 text-accent">R$ {product.consultancyPrice}</Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+
+                  {/* Taxonomy Config */}
+                  <div>
+                    <h3 className="font-display font-bold text-foreground mb-3">Configuração de Taxonomias</h3>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="rounded-lg border border-border p-4">
+                        <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                          <DollarSign className="h-4 w-4 text-accent" />
+                          Faixas de Investimento
+                        </h4>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Cada modelo tem faixas de investimento configuráveis (mínimo, médio, alto).
+                        </p>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Badge variant="outline">R$ 5.000</Badge>
+                            <span className="text-muted-foreground">Investimento mínimo</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Badge variant="outline">R$ 20.000</Badge>
+                            <span className="text-muted-foreground">Investimento médio</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Badge variant="outline">R$ 50.000</Badge>
+                            <span className="text-muted-foreground">Investimento alto</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="rounded-lg border border-border p-4">
+                        <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                          <Users className="h-4 w-4 text-accent" />
+                          Público-Alvo
+                        </h4>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Define as estratégias de marketing e posicionamento do modelo.
+                        </p>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Badge variant="outline">A e B</Badge>
+                            <span className="text-muted-foreground">Premium, alto poder aquisitivo</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Badge variant="outline">B e C</Badge>
+                            <span className="text-muted-foreground">Classe média, equilíbrio</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Badge variant="outline">C e D</Badge>
+                            <span className="text-muted-foreground">Popular, alto volume</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-accent/30 bg-accent/5 p-4">
+                    <p className="text-sm text-muted-foreground">
+                      💡 <strong>Nota:</strong> Para adicionar novos modelos validados, transformar teóricos em validados, ou alterar perfis de validadores, 
+                      edite o produto na aba "Produtos" e configure os campos de validação. As taxonomias de investimento e público-alvo são aplicadas automaticamente 
+                      com base na faixa de preço do modelo.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="promotions" className="space-y-4">
             {/* Coupons Section */}
             <Card>
@@ -711,7 +861,7 @@ const Admin = () => {
                 />
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
                   <Label>Preço (R$)</Label>
                   <Input
@@ -726,7 +876,95 @@ const Admin = () => {
                   <Label>Categoria</Label>
                   <Input value={editingProduct.category} disabled />
                 </div>
+                <div className="space-y-2">
+                  <Label>Tipo do Modelo</Label>
+                  <Select
+                    value={editingProduct.modelType}
+                    onValueChange={(value: ModelType) =>
+                      setEditingProduct({ ...editingProduct, modelType: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Teórico">📖 Teórico</SelectItem>
+                      <SelectItem value="Validado">🏆 Validado (+R$ 150)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+
+              {/* Validator fields - shown for Validado models */}
+              {editingProduct.modelType === "Validado" && (
+                <div className="rounded-lg border border-accent/30 bg-accent/5 p-4 space-y-4">
+                  <h4 className="font-semibold text-foreground flex items-center gap-2">
+                    <Award className="h-4 w-4 text-accent" />
+                    Dados do Validador
+                  </h4>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Nome do Validador</Label>
+                      <Input
+                        value={editingProduct.validator?.name || ""}
+                        onChange={(e) =>
+                          setEditingProduct({
+                            ...editingProduct,
+                            validator: { ...editingProduct.validator!, name: e.target.value },
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Área de Atuação</Label>
+                      <Input
+                        value={editingProduct.validator?.area || ""}
+                        onChange={(e) =>
+                          setEditingProduct({
+                            ...editingProduct,
+                            validator: { ...editingProduct.validator!, area: e.target.value },
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Foto do Validador (URL)</Label>
+                    <Input
+                      value={editingProduct.validator?.photo || ""}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          validator: { ...editingProduct.validator!, photo: e.target.value },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>História do Profissional</Label>
+                    <Textarea
+                      value={editingProduct.validator?.story || ""}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          validator: { ...editingProduct.validator!, story: e.target.value },
+                        })
+                      }
+                      rows={3}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Preço da Consultoria (R$)</Label>
+                    <Input
+                      type="number"
+                      value={editingProduct.consultancyPrice || 99}
+                      onChange={(e) =>
+                        setEditingProduct({ ...editingProduct, consultancyPrice: Number(e.target.value) })
+                      }
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>Descrição Curta</Label>
