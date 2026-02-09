@@ -46,7 +46,7 @@ const PremiumScaleSection = ({ products, showPromoPrice = false }: PremiumScaleS
           </div>
           
           <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
-            Modelos para <span className="text-accent">Escalar</span> seu Negócio
+            Modelos para <span className="text-accent text-3xl md:text-4xl">Escalar</span> seu Negócio
           </h2>
           
           <p className="text-primary-foreground/80 text-lg max-w-2xl mx-auto mb-8">

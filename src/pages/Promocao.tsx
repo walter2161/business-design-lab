@@ -99,7 +99,7 @@ const Promocao = () => {
             </div>
 
             <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-6">
-              <span className="text-navy-dark">10% OFF</span> no seu 
+              <span className="text-navy-dark text-4xl md:text-6xl">10% OFF</span> no seu 
               <br />Primeiro Modelo de Negócio
             </h1>
 
